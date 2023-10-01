@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import argparse
 import sys
@@ -13,7 +13,7 @@ def main(argv: List[str]) -> int:
 
     args = parser.parse_args(argv)
 
-    results = {"sellable": [], "unsellable": []}
+    results: Dict[str, List[str]] = {"sellable": [], "unsellable": []}
     for filepath in args.battle_move_files:
         with open(filepath, "r") as input_stream:
             for line in input_stream:
