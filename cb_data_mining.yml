@@ -1,0 +1,10 @@
+name: cb_data_mining
+dependencies:
+  - python=3
+  - pip
+  - pip:
+      - pandas
+      - scipy
+      - plotnine
+      - jupyterlab
+      - godot-parser
