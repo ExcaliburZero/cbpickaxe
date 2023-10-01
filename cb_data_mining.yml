@@ -3,8 +3,7 @@ dependencies:
   - python=3
   - pip
   - pip:
-      - pandas
-      - scipy
-      - plotnine
-      - jupyterlab
       - godot-parser
+      - mypy
+      - black
+      - build
