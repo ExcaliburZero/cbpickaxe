@@ -29,7 +29,6 @@ def main(argv: List[str]) -> int:
     with open(pathlib.Path("data") / "monster_forms.json", "w") as output_stream:
         data = []
         for _, monster_form in sorted(monster_forms.items()):
-            print(monster_form)
             data.append(dataclasses.asdict(monster_form))
 
         json.dump(data, output_stream, indent=4)
