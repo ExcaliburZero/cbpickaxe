@@ -1,3 +1,3 @@
 test:
-	python -m black *.py **/*.py
-	python -m mypy *.py **/*.py
+	python -m black **/*.py
+	python -m mypy **/*.py
