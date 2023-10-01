@@ -24,6 +24,8 @@ class TapeUpgrade:
 class MonsterForm:
     name: str
     elemental_types: List[str]
+    exp_yield: int
+    require_dlc: str
     bestiary_index: int
     move_slots: int
     tape_upgrades: List[Union[TapeUpgrade, str]]
@@ -46,6 +48,8 @@ class MonsterForm:
         scene = gp.parse(input_stream.read())
 
         name = None
+        exp_yield = None
+        require_dlc = None
         move_slots = None
         tape_upgrades: Optional[Sequence[TapeUpgrade]] = None
 
@@ -54,6 +58,8 @@ class MonsterForm:
                 name = section["name"]
                 bestiary_index = section["bestiary_index"]
                 move_slots = section["move_slots"]
+                exp_yield = section["exp_yield"]
+                require_dlc = section["require_dlc"]
 
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
                 elemental_types = MonsterForm.__parse_elemental_types(scene, section)
@@ -61,11 +67,15 @@ class MonsterForm:
         assert isinstance(name, str)
         assert isinstance(bestiary_index, int)
         assert isinstance(move_slots, int)
+        assert isinstance(exp_yield, int)
+        assert isinstance(require_dlc, str)
         assert tape_upgrades is not None
 
         return MonsterForm(
             name=name,
             elemental_types=elemental_types,
+            exp_yield=exp_yield,
+            require_dlc=require_dlc,
             bestiary_index=bestiary_index,
             move_slots=move_slots,
             tape_upgrades=list(tape_upgrades),
