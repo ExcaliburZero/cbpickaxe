@@ -29,6 +29,14 @@ class MonsterForm:
     pronouns: int
     description: str
     max_hp: int
+    melee_attack: int
+    melee_defense: int
+    ranged_attack: int
+    ranged_defense: int
+    speed: int
+    accuracy: int
+    evasion: int
+    max_ap: int
     bestiary_index: int
     move_slots: int
     tape_upgrades: List[Union[TapeUpgrade, str]]
@@ -57,6 +65,14 @@ class MonsterForm:
         pronouns = None
         description = None
         max_hp = None
+        melee_attack = None
+        melee_defense = None
+        ranged_attack = None
+        ranged_defense = None
+        speed = None
+        accuracy = None
+        evasion = None
+        max_ap = None
         tape_upgrades: Optional[Sequence[TapeUpgrade]] = None
 
         for section in scene.get_sections():
@@ -69,6 +85,14 @@ class MonsterForm:
                 pronouns = section["pronouns"]
                 description = section["description"]
                 max_hp = section["max_hp"]
+                melee_attack = section["melee_attack"]
+                melee_defense = section["melee_defense"]
+                ranged_attack = section["ranged_attack"]
+                ranged_defense = section["ranged_defense"]
+                speed = section["speed"]
+                accuracy = section["accuracy"]
+                evasion = section["evasion"]
+                max_ap = section["max_ap"]
 
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
                 elemental_types = MonsterForm.__parse_elemental_types(scene, section)
@@ -81,6 +105,14 @@ class MonsterForm:
         assert isinstance(pronouns, int)
         assert isinstance(description, str)
         assert isinstance(max_hp, int)
+        assert isinstance(melee_attack, int)
+        assert isinstance(melee_defense, int)
+        assert isinstance(ranged_attack, int)
+        assert isinstance(ranged_defense, int)
+        assert isinstance(speed, int)
+        assert isinstance(accuracy, int)
+        assert isinstance(evasion, int)
+        assert isinstance(max_ap, int)
         assert tape_upgrades is not None
 
         return MonsterForm(
@@ -91,6 +123,14 @@ class MonsterForm:
             pronouns=pronouns,
             description=description,
             max_hp=max_hp,
+            melee_attack=melee_attack,
+            melee_defense=melee_defense,
+            ranged_attack=ranged_attack,
+            ranged_defense=ranged_defense,
+            speed=speed,
+            accuracy=accuracy,
+            evasion=evasion,
+            max_ap=max_ap,
             bestiary_index=bestiary_index,
             move_slots=move_slots,
             tape_upgrades=list(tape_upgrades),
