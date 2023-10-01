@@ -23,6 +23,7 @@ class TapeUpgrade:
 @dataclass
 class MonsterForm:
     name: str
+    elemental_types: List[str]
     bestiary_index: int
     move_slots: int
     tape_upgrades: List[Union[TapeUpgrade, str]]
@@ -55,6 +56,7 @@ class MonsterForm:
                 move_slots = section["move_slots"]
 
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
+                elemental_types = MonsterForm.__parse_elemental_types(scene, section)
 
         assert isinstance(name, str)
         assert isinstance(bestiary_index, int)
@@ -63,6 +65,7 @@ class MonsterForm:
 
         return MonsterForm(
             name=name,
+            elemental_types=elemental_types,
             bestiary_index=bestiary_index,
             move_slots=move_slots,
             tape_upgrades=list(tape_upgrades),
@@ -88,6 +91,21 @@ class MonsterForm:
             raise ValueError(f"Could not find tape upgrade with id={upgrade.id}")
 
         return tape_upgrades
+
+    @staticmethod
+    def __parse_elemental_types(
+        scene: gp.GDScene, section: gp.GDResourceSection
+    ) -> List[str]:
+        elemental_types_raw = section["elemental_types"]
+        elemental_types = []
+        for raw_type in elemental_types_raw:
+            ext_resource = scene.find_ext_resource(id=raw_type.id)
+            assert ext_resource is not None
+
+            elemental_type = ext_resource.path.split("/")[-1].split(".tres")[0]
+            elemental_types.append(elemental_type)
+
+        return elemental_types
 
 
 if __name__ == "__main__":
