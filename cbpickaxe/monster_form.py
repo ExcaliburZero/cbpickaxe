@@ -21,6 +21,11 @@ class TapeUpgrade:
 
 
 @dataclass
+class Evolution:
+    name: str
+
+
+@dataclass
 class MonsterForm:
     name: str
     elemental_types: List[str]
@@ -37,8 +42,9 @@ class MonsterForm:
     accuracy: int
     evasion: int
     max_ap: int
-    bestiary_index: int
     move_slots: int
+    evolutions: List[Evolution]
+    bestiary_index: int
     tape_upgrades: List[Union[TapeUpgrade, str]]
 
     @property
@@ -73,6 +79,7 @@ class MonsterForm:
         accuracy = None
         evasion = None
         max_ap = None
+        evolutions = None
         tape_upgrades: Optional[Sequence[TapeUpgrade]] = None
 
         for section in scene.get_sections():
@@ -96,6 +103,7 @@ class MonsterForm:
 
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
                 elemental_types = MonsterForm.__parse_elemental_types(scene, section)
+                evolutions = MonsterForm.__parse_evolutions(scene, section)
 
         assert isinstance(name, str)
         assert isinstance(bestiary_index, int)
@@ -114,6 +122,7 @@ class MonsterForm:
         assert isinstance(evasion, int)
         assert isinstance(max_ap, int)
         assert tape_upgrades is not None
+        assert evolutions is not None
 
         return MonsterForm(
             name=name,
@@ -131,8 +140,9 @@ class MonsterForm:
             accuracy=accuracy,
             evasion=evasion,
             max_ap=max_ap,
-            bestiary_index=bestiary_index,
             move_slots=move_slots,
+            evolutions=evolutions,
+            bestiary_index=bestiary_index,
             tape_upgrades=list(tape_upgrades),
         )
 
@@ -171,6 +181,24 @@ class MonsterForm:
             elemental_types.append(elemental_type)
 
         return elemental_types
+
+    @staticmethod
+    def __parse_evolutions(
+        scene: gp.GDScene, section: gp.GDResourceSection
+    ) -> List[Evolution]:
+        evolution_resources = section["evolutions"]
+        evolutions = []
+        for sub_section in evolution_resources:
+            sub_resource = scene.find_sub_resource(id=sub_section.id)
+            assert sub_resource is not None
+
+            name = sub_resource["resource_name"]
+
+            assert isinstance(name, str)
+
+            evolutions.append(Evolution(name=name))
+
+        return evolutions
 
 
 if __name__ == "__main__":
