@@ -26,6 +26,9 @@ class MonsterForm:
     elemental_types: List[str]
     exp_yield: int
     require_dlc: str
+    pronouns: int
+    description: str
+    max_hp: int
     bestiary_index: int
     move_slots: int
     tape_upgrades: List[Union[TapeUpgrade, str]]
@@ -51,6 +54,9 @@ class MonsterForm:
         exp_yield = None
         require_dlc = None
         move_slots = None
+        pronouns = None
+        description = None
+        max_hp = None
         tape_upgrades: Optional[Sequence[TapeUpgrade]] = None
 
         for section in scene.get_sections():
@@ -60,6 +66,9 @@ class MonsterForm:
                 move_slots = section["move_slots"]
                 exp_yield = section["exp_yield"]
                 require_dlc = section["require_dlc"]
+                pronouns = section["pronouns"]
+                description = section["description"]
+                max_hp = section["max_hp"]
 
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
                 elemental_types = MonsterForm.__parse_elemental_types(scene, section)
@@ -69,6 +78,9 @@ class MonsterForm:
         assert isinstance(move_slots, int)
         assert isinstance(exp_yield, int)
         assert isinstance(require_dlc, str)
+        assert isinstance(pronouns, int)
+        assert isinstance(description, str)
+        assert isinstance(max_hp, int)
         assert tape_upgrades is not None
 
         return MonsterForm(
@@ -76,6 +88,9 @@ class MonsterForm:
             elemental_types=elemental_types,
             exp_yield=exp_yield,
             require_dlc=require_dlc,
+            pronouns=pronouns,
+            description=description,
+            max_hp=max_hp,
             bestiary_index=bestiary_index,
             move_slots=move_slots,
             tape_upgrades=list(tape_upgrades),
