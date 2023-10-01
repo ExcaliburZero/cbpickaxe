@@ -5,6 +5,7 @@ import sys
 
 SUCCESS = 0
 
+
 def main(argv: List[str]) -> int:
     parser = argparse.ArgumentParser()
 
@@ -30,6 +31,7 @@ def main(argv: List[str]) -> int:
         print(f"{sticker},unsellable")
 
     return SUCCESS
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
