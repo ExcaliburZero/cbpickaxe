@@ -80,7 +80,7 @@ class MonsterForm:
         evasion = None
         max_ap = None
         evolutions = None
-        tape_upgrades: Optional[Sequence[TapeUpgrade]] = None
+        tape_upgrades: Optional[List[Union[TapeUpgrade, str]]] = None
 
         for section in scene.get_sections():
             if type(section) == gp.GDResourceSection:
@@ -143,15 +143,15 @@ class MonsterForm:
             move_slots=move_slots,
             evolutions=evolutions,
             bestiary_index=bestiary_index,
-            tape_upgrades=list(tape_upgrades),
+            tape_upgrades=tape_upgrades,
         )
 
     @staticmethod
     def __parse_tape_upgrades(
-        scene: gp.GDScene, section: gp.GDResourceSection
-    ) -> Sequence[TapeUpgrade]:
+        scene: gp.GDFile, section: gp.GDResourceSection
+    ) -> List[Union[TapeUpgrade, str]]:
         tape_upgrade_ids = section["tape_upgrades"]
-        tape_upgrades = []
+        tape_upgrades: List[Union[TapeUpgrade, str]] = []
         for upgrade in tape_upgrade_ids:
             sub_resource = scene.find_sub_resource(id=upgrade.id)
             if sub_resource is not None:
@@ -169,7 +169,7 @@ class MonsterForm:
 
     @staticmethod
     def __parse_elemental_types(
-        scene: gp.GDScene, section: gp.GDResourceSection
+        scene: gp.GDFile, section: gp.GDResourceSection
     ) -> List[str]:
         elemental_types_raw = section["elemental_types"]
         elemental_types = []
@@ -184,7 +184,7 @@ class MonsterForm:
 
     @staticmethod
     def __parse_evolutions(
-        scene: gp.GDScene, section: gp.GDResourceSection
+        scene: gp.GDFile, section: gp.GDResourceSection
     ) -> List[Evolution]:
         evolution_resources = section["evolutions"]
         evolutions = []
