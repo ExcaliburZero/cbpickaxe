@@ -1,6 +1,9 @@
 from typing import Dict, List
 
 import argparse
+import dataclasses
+import json
+import pathlib
 import sys
 
 import cbpickaxe as cbp
@@ -23,8 +26,13 @@ def main(argv: List[str]) -> int:
 
         monster_forms[monster_form.bestiary_index] = monster_form
 
-    for _, monster_form in sorted(monster_forms.items()):
-        print(monster_form)
+    with open(pathlib.Path("data") / "monster_forms.json", "w") as output_stream:
+        data = []
+        for _, monster_form in sorted(monster_forms.items()):
+            print(monster_form)
+            data.append(dataclasses.asdict(monster_form))
+
+        json.dump(data, output_stream, indent=4)
 
     return SUCCESS
 
