@@ -54,24 +54,7 @@ class MonsterForm:
                 bestiary_index = section["bestiary_index"]
                 move_slots = section["move_slots"]
 
-                tape_upgrade_ids = section["tape_upgrades"]
-                tape_upgrades = []
-                for upgrade in tape_upgrade_ids:
-                    sub_resource = scene.find_sub_resource(id=upgrade.id)
-                    if sub_resource is not None:
-                        tape_upgrades.append(
-                            TapeUpgrade.from_sub_resource(sub_resource)
-                        )
-                        continue
-
-                    ext_resource = scene.find_ext_resource(id=upgrade.id)
-                    if ext_resource is not None:
-                        tape_upgrades.append(ext_resource.path)
-                        continue
-
-                    raise ValueError(
-                        f"Could not find tape upgrade with id={upgrade.id}"
-                    )
+                tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
 
         assert isinstance(name, str)
         assert isinstance(bestiary_index, int)
@@ -84,6 +67,27 @@ class MonsterForm:
             move_slots=move_slots,
             tape_upgrades=list(tape_upgrades),
         )
+
+    @staticmethod
+    def __parse_tape_upgrades(
+        scene: gp.GDScene, section: gp.GDResourceSection
+    ) -> Sequence[TapeUpgrade]:
+        tape_upgrade_ids = section["tape_upgrades"]
+        tape_upgrades = []
+        for upgrade in tape_upgrade_ids:
+            sub_resource = scene.find_sub_resource(id=upgrade.id)
+            if sub_resource is not None:
+                tape_upgrades.append(TapeUpgrade.from_sub_resource(sub_resource))
+                continue
+
+            ext_resource = scene.find_ext_resource(id=upgrade.id)
+            if ext_resource is not None:
+                tape_upgrades.append(ext_resource.path)
+                continue
+
+            raise ValueError(f"Could not find tape upgrade with id={upgrade.id}")
+
+        return tape_upgrades
 
 
 if __name__ == "__main__":
