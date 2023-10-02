@@ -17,10 +17,14 @@ def main(argv: List[str]) -> int:
 
     args = parser.parse_args(argv)
 
+    strings_to_translate = ["AVEREVOIR_NAME", "MAGIKRAB_NAME", "SPRINGHEEL_NAME"]
+
     tables = {}
     for translation_filepath in args.translation_files:
         with open(translation_filepath, "rb") as input_stream:
-            translation_table = cbp.TranslationTable.from_translation(input_stream)
+            translation_table = cbp.TranslationTable.from_translation(
+                input_stream, strings_to_translate
+            )
 
         tables[translation_filepath] = translation_table
 

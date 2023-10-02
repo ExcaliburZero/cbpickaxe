@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import cast, Dict, IO, List, Literal, Tuple, Union
+from typing import cast, Dict, IO, List, Literal, Optional, Tuple, Union
 
 import enum
 
@@ -58,17 +58,33 @@ class VariantBin(enum.Enum):
 
 
 @dataclass
-class Bucket:
-    size: int
-    func: int
+class BucketElement:
     key: int
     str_offset: int
     comp_size: int
     uncomp_size: int
 
     @staticmethod
+    def from_ints(ints: List[int]) -> "BucketElement":
+        return BucketElement(*ints)
+
+
+@dataclass
+class Bucket:
+    size: int
+    func: int
+    elements: List[BucketElement]
+
+    @staticmethod
     def from_ints(ints: List[int]) -> "Bucket":
-        return Bucket(*ints)
+        return Bucket(
+            ints[0],
+            ints[1],
+            [
+                BucketElement.from_ints(ints[2 + i * 4 : 2 + (i + 1) * 4])
+                for i in range(0, ints[0])
+            ],
+        )
 
 
 @dataclass
@@ -76,7 +92,9 @@ class TranslationTable:
     messages: Dict[str, str]
 
     @staticmethod
-    def from_translation(input_stream: IO[bytes]) -> "TranslationTable":
+    def from_translation(
+        input_stream: IO[bytes], strings_to_translate: List[str]
+    ) -> "TranslationTable":
         header = input_stream.read(4).decode("ascii")
         assert header == "RSRC"
 
@@ -164,44 +182,57 @@ class TranslationTable:
 
             print(f"  properties: {[(n, type(v)) for n, v in properties]}")
 
-            """
             hashes = properties[0][1]
             print(properties[0][0])
 
             buckets = properties[1][1]
+            strings = properties[2][1]
 
             messages: Dict[str, str] = {}
-            for hash in hashes:
+            print(f"strings: {strings_to_translate}")
+            for string in strings_to_translate:
+                print(f"string: {string}")
+                h = TranslationTable.__hash(0, string)
+
+                hash = hashes[h % len(hashes)]
+
                 assert isinstance(hash, int)
-                buckets = cast(List[int], buckets)
 
                 s = ""
+                buckets = cast(List[int], buckets)
+                print(f"len(buckets): {len(buckets)}")
+
+                assert isinstance(hash, int)
+                print(f"hash = {hash}")
                 if hash == 0xFFFFFFFF:
                     continue
 
-                BUCKET_SIZE = 6
-                print(buckets[0])
-                bucket = Bucket.from_ints(buckets[hash : hash + BUCKET_SIZE])
+                bucket_size = buckets[hash]
+                bucket = Bucket.from_ints(buckets[hash : hash + 2 + 4 * bucket_size])
                 print(bucket)
 
-                h = TranslationTable.__hash(bucket.func, )
-            """
+                h = TranslationTable.__hash(bucket.func, string)
 
-            strings = cast(List[bytes], properties[2][1])
+                idx: Optional[BucketElement] = None
+                value = None
+                for e in bucket.elements:
+                    if e.key == h:
+                        idx = e
+                        value = b"".join(
+                            strings[e.str_offset : e.str_offset + e.comp_size]
+                        )
 
-            translation_strings: List[str] = []
-            for string_bytes in TranslationTable.__split_list(strings, b"\x00"):
-                try:
-                    translation_strings.append(string_bytes.decode("utf8"))
-                    print(translation_strings[-1])
-                    print(smaz.compress(string_bytes.decode("utf8")))
-                    print(smaz.decompress(smaz.compress(string_bytes.decode("utf8"))))
-                except UnicodeDecodeError:
-                    print(string_bytes)
-                    translation_strings.append(smaz.decompress(string_bytes))
-                    print(translation_strings[-1])
+                        if e.comp_size == e.uncomp_size:
+                            value = value.decode("utf8")
+                        else:
+                            value = smaz.decompress(value)
 
-            messages = {f"{i}": msg for i, msg in enumerate(translation_strings)}
+                        assert isinstance(value, str)
+
+                        messages[string] = value
+
+                if idx is None:
+                    continue
 
             return TranslationTable(messages)
 
@@ -209,15 +240,27 @@ class TranslationTable:
 
     @staticmethod
     def __hash(d: int, value: str) -> int:
+        import numpy as np
+
+        np.seterr(over="ignore")
+
         str_bytes = value.encode("utf8")
+        print(f"d={d}, value={value}")
 
         if d == 0:
             d = 0x1000193
 
-        for b in str_bytes:
-            d = (d * 0x1000193) ** b
+        d = np.uint32(d)
 
-        return d
+        for b in str_bytes:
+            b = np.uint32(b)
+            print(f"  d={d}\tb={b}")
+            # d = ((d * 0x1000193) % 0x100000000) ^ b
+            d = (d * np.uint32(0x1000193)) ^ b
+
+        print(f"  d={d}")
+
+        return int(d)
 
     @staticmethod
     def __split_list(l: List[bytes], value: bytes) -> List[bytes]:
