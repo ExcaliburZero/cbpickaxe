@@ -16,13 +16,21 @@ FAILURE = 1
 def main(argv: List[str]) -> int:
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("translation_files", nargs="+")
+    parser.add_argument("--translation_files", nargs="+", required=True)
+    parser.add_argument("--strings_text_files", nargs="+", required=True)
+    parser.add_argument("--output_file", required=True)
 
     args = parser.parse_args(argv)
 
-    with open(pathlib.Path("data") / "monster_forms.json", "r") as input_stream:
-        monster_forms = json.load(input_stream)
-        strings_to_translate = [form["name"] for form in monster_forms]
+    strings_to_translate = []
+    for filepath in args.strings_text_files:
+        with open(filepath, "r") as input_stream:
+            for line in input_stream:
+                line = line.strip()
+                if line == "":
+                    continue
+
+                strings_to_translate.append(line)
 
     tables = {}
     for translation_filepath in args.translation_files:
@@ -38,7 +46,7 @@ def main(argv: List[str]) -> int:
         for translation_filepath in args.translation_files
     }
 
-    with open("translation_strings.csv", "w") as ouput_stream:
+    with open(args.output_file, "w") as ouput_stream:
         writer = csv.DictWriter(
             ouput_stream, fieldnames=["id", *sorted(set(locales.values()))]
         )
