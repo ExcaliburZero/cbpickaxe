@@ -2,6 +2,9 @@ from typing import List
 
 import argparse
 import csv
+import json
+import pathlib
+import re
 import sys
 
 import cbpickaxe as cbp
@@ -17,12 +20,9 @@ def main(argv: List[str]) -> int:
 
     args = parser.parse_args(argv)
 
-    strings_to_translate = [
-        "AVEREVOIR_NAME",
-        "MAGIKRAB_NAME",
-        "SPRINGHEEL_NAME",
-        "MISS_MIMIC_NAME",
-    ]
+    with open(pathlib.Path("data") / "monster_forms.json", "r") as input_stream:
+        monster_forms = json.load(input_stream)
+        strings_to_translate = [form["name"] for form in monster_forms]
 
     tables = {}
     for translation_filepath in args.translation_files:
@@ -33,15 +33,30 @@ def main(argv: List[str]) -> int:
 
         tables[translation_filepath] = translation_table
 
+    locales = {
+        translation_filepath: pathlib.Path(translation_filepath).name.split(".")[-2]
+        for translation_filepath in args.translation_files
+    }
+
     with open("translation_strings.csv", "w") as ouput_stream:
         writer = csv.DictWriter(
-            ouput_stream, fieldnames=["id", *args.translation_files]
+            ouput_stream, fieldnames=["id", *sorted(set(locales.values()))]
         )
         writer.writeheader()
-        for i in sorted(list(tables.values())[0].messages.keys()):
-            writer.writerow(
-                {"id": i, **{name: table.messages[i] for name, table in tables.items()}}
-            )
+
+        for i in strings_to_translate:
+            row = {
+                "id": i,
+            }
+            for name, table in tables.items():
+                locale = locales[name]
+                message = table.messages.get(i, "")
+                assert isinstance(message, str)
+
+                if message != "":
+                    row[locale] = message
+
+            writer.writerow(row)
 
     return SUCCESS
 
