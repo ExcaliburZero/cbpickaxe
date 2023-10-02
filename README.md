@@ -15,7 +15,7 @@ print(monster.move_slots)
 ## Installation
 ```bash
 git clone https://github.com/ExcaliburZero/cbpickaxe.git
-cd cbbpickaxe
+cd cbpickaxe
 pip install -e .
 ```
 
