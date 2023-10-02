@@ -6,7 +6,7 @@ import enum
 import smaz
 
 
-PropertyValue = Union[List[bytes], List[int]]
+PropertyValue = Union[List[bytes], List[int], str]
 
 
 class VariantBin(enum.Enum):
@@ -155,10 +155,13 @@ class TranslationTable:
 
                 properties.append((name, variant))
 
-            hashes = properties[0][1]
+            properties_by_name = {
+                prop[0].rstrip("\x00"): prop[1] for prop in properties
+            }
 
-            buckets = properties[1][1]
-            strings = properties[2][1]
+            hashes = properties_by_name["hash_table"]
+            buckets = properties_by_name["bucket_table"]
+            strings = properties_by_name["strings"]
 
             assert isinstance(strings[0], bytes)
             strings = cast(List[bytes], strings)
@@ -253,6 +256,8 @@ class TranslationTable:
         t = int.from_bytes(input_stream.read(4), endian)
 
         v = VariantBin(t)
+        if v == VariantBin.VARIANT_STRING:
+            return TranslationTable.__read_unicode_string(input_stream, endian)
         if v == VariantBin.VARIANT_RAW_ARRAY:
             length = int.from_bytes(input_stream.read(4), endian)
             values_bytes: List[bytes] = [input_stream.read(1) for _ in range(0, length)]
