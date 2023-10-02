@@ -17,7 +17,12 @@ def main(argv: List[str]) -> int:
 
     args = parser.parse_args(argv)
 
-    strings_to_translate = ["AVEREVOIR_NAME", "MAGIKRAB_NAME", "SPRINGHEEL_NAME"]
+    strings_to_translate = [
+        "AVEREVOIR_NAME",
+        "MAGIKRAB_NAME",
+        "SPRINGHEEL_NAME",
+        "MISS_MIMIC_NAME",
+    ]
 
     tables = {}
     for translation_filepath in args.translation_files:

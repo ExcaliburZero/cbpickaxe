@@ -188,6 +188,9 @@ class TranslationTable:
             buckets = properties[1][1]
             strings = properties[2][1]
 
+            assert isinstance(strings[0], bytes)
+            strings = cast(List[bytes], strings)
+
             messages: Dict[str, str] = {}
             print(f"strings: {strings_to_translate}")
             for string in strings_to_translate:
@@ -213,26 +216,20 @@ class TranslationTable:
 
                 h = TranslationTable.__hash(bucket.func, string)
 
-                idx: Optional[BucketElement] = None
-                value = None
                 for e in bucket.elements:
                     if e.key == h:
-                        idx = e
-                        value = b"".join(
+                        value_bytes = b"".join(
                             strings[e.str_offset : e.str_offset + e.comp_size]
                         )
 
                         if e.comp_size == e.uncomp_size:
-                            value = value.decode("utf8")
+                            value = value_bytes.decode("utf8")
                         else:
-                            value = smaz.decompress(value)
+                            value = smaz.decompress(value_bytes)
 
                         assert isinstance(value, str)
 
-                        messages[string] = value
-
-                if idx is None:
-                    continue
+                        messages[string] = value.rstrip("\x00")
 
             return TranslationTable(messages)
 
@@ -250,13 +247,13 @@ class TranslationTable:
         if d == 0:
             d = 0x1000193
 
-        d = np.uint32(d)
+        # d = np.uint32(d)
 
         for b in str_bytes:
-            b = np.uint32(b)
+            # b = np.uint32(b)
             print(f"  d={d}\tb={b}")
-            # d = ((d * 0x1000193) % 0x100000000) ^ b
-            d = (d * np.uint32(0x1000193)) ^ b
+            d = ((d * 0x1000193) % 0x100000000) ^ b
+            # d = (d * np.uint32(0x1000193)) ^ b
 
         print(f"  d={d}")
 
