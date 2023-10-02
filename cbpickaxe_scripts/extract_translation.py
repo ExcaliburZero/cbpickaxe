@@ -61,5 +61,5 @@ def main(argv: List[str]) -> int:
     return SUCCESS
 
 
-if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+def main_without_args() -> int:
+    return main(sys.argv[1:])
