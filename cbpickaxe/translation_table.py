@@ -101,23 +101,15 @@ class TranslationTable:
         big_endian = input_stream.read(4) != b"\x00\x00\x00\x00"
         use_real64 = input_stream.read(4) != b"\x00\x00\x00\x00"
         endian: Literal["big", "little"] = "big" if big_endian else "little"
-        print(f"big_endian: {big_endian}")
-        print(f"use_real64: {use_real64}")
 
         engine_ver_major = int.from_bytes(input_stream.read(4), endian)
         engine_ver_minor = int.from_bytes(input_stream.read(4), endian)
         ver_format_bin = int.from_bytes(input_stream.read(4), endian)
-        print(f"engine_ver_major: {engine_ver_major}")
-        print(f"engine_ver_minor: {engine_ver_minor}")
-        print(f"ver_format_bin: {ver_format_bin}")
 
         resource_type = TranslationTable.__read_unicode_string(input_stream, endian)
-        print(f"resource_type: {resource_type}")
 
         importmd_ofs = int.from_bytes(input_stream.read(8), endian)
         flags = int.from_bytes(input_stream.read(4), endian)
-        print(f"importmd_ofs: {importmd_ofs}")
-        print(f"flags: {flags}")
 
         # Skip over res_uid field
         input_stream.read(8)
@@ -127,22 +119,15 @@ class TranslationTable:
             input_stream.read(4)
 
         string_table_size = int.from_bytes(input_stream.read(4), endian)
-        print(f"string_table_size: {string_table_size}")
-
         string_map = [
             TranslationTable.__read_unicode_string(input_stream, endian)
             for _ in range(0, string_table_size)
         ]
 
-        print(f"string_map: {string_map}")
-
         ext_resources_size = int.from_bytes(input_stream.read(4), endian)
         assert ext_resources_size == 0
-        print(f"ext_resources_size: {ext_resources_size}")
 
         int_resources_size = int.from_bytes(input_stream.read(4), endian)
-        print(f"int_resources_size: {int_resources_size}")
-
         int_resources = [
             (
                 TranslationTable.__read_unicode_string(input_stream, endian),
@@ -150,13 +135,9 @@ class TranslationTable:
             )
             for _ in range(0, int_resources_size)
         ]
-        print(f"int_resources: {int_resources}")
 
         for i, (path, offset) in enumerate(int_resources):
-            print(f"i={i}, path={path}, offset={offset}")
-
             main = i == (len(int_resources) - 1)
-            print(f"  main: {main}")
             assert main
 
             # TODO: local path???
@@ -164,26 +145,17 @@ class TranslationTable:
 
             input_stream.seek(offset)
             rtype = TranslationTable.__read_unicode_string(input_stream, endian)
-            print(f"  rtype: {rtype}")
 
             pc = int.from_bytes(input_stream.read(4), endian)
-            print(f"  pc: {pc}")
 
             properties: List[Tuple[str, PropertyValue]] = []
-            for j in range(0, pc):
-                print(f"    location: {input_stream.tell()}")
+            for _ in range(0, pc):
                 name = TranslationTable.__get_string(input_stream, endian, string_map)
-                print(f"    name: {name}")
-
                 variant = TranslationTable.__read_variant(input_stream, endian)
-                print(f"    variant: {variant}")
 
                 properties.append((name, variant))
 
-            print(f"  properties: {[(n, type(v)) for n, v in properties]}")
-
             hashes = properties[0][1]
-            print(properties[0][0])
 
             buckets = properties[1][1]
             strings = properties[2][1]
@@ -192,27 +164,18 @@ class TranslationTable:
             strings = cast(List[bytes], strings)
 
             messages: Dict[str, str] = {}
-            print(f"strings: {strings_to_translate}")
             for string in strings_to_translate:
-                print(f"string: {string}")
                 h = TranslationTable.__hash(0, string)
 
                 hash = hashes[h % len(hashes)]
 
                 assert isinstance(hash, int)
-
-                s = ""
-                buckets = cast(List[int], buckets)
-                print(f"len(buckets): {len(buckets)}")
-
-                assert isinstance(hash, int)
-                print(f"hash = {hash}")
                 if hash == 0xFFFFFFFF:
                     continue
 
+                buckets = cast(List[int], buckets)
                 bucket_size = buckets[hash]
                 bucket = Bucket.from_ints(buckets[hash : hash + 2 + 4 * bucket_size])
-                print(bucket)
 
                 h = TranslationTable.__hash(bucket.func, string)
 
@@ -237,27 +200,16 @@ class TranslationTable:
 
     @staticmethod
     def __hash(d: int, value: str) -> int:
-        import numpy as np
-
-        np.seterr(over="ignore")
-
+        # https://github.com/MaxStgs/godot/blob/31d0f8ad8d5cf50a310ee7e8ada4dcdb4510690b/core/compressed_translation.h#L66-L77
         str_bytes = value.encode("utf8")
-        print(f"d={d}, value={value}")
 
         if d == 0:
             d = 0x1000193
 
-        # d = np.uint32(d)
-
         for b in str_bytes:
-            # b = np.uint32(b)
-            print(f"  d={d}\tb={b}")
             d = ((d * 0x1000193) % 0x100000000) ^ b
-            # d = (d * np.uint32(0x1000193)) ^ b
 
-        print(f"  d={d}")
-
-        return int(d)
+        return d
 
     @staticmethod
     def __split_list(l: List[bytes], value: bytes) -> List[bytes]:
@@ -281,7 +233,6 @@ class TranslationTable:
         input_stream: IO[bytes], endian: Literal["big", "little"], string_map: List[str]
     ) -> str:
         index = int.from_bytes(input_stream.read(4), endian)
-        print(f"index={index}")
         assert index < len(string_map), "Not yet supported"
 
         return string_map[index]
@@ -301,17 +252,12 @@ class TranslationTable:
     ) -> PropertyValue:
         t = int.from_bytes(input_stream.read(4), endian)
 
-        print(f"    t: {t}")
-
         v = VariantBin(t)
-
         if v == VariantBin.VARIANT_RAW_ARRAY:
             length = int.from_bytes(input_stream.read(4), endian)
-            print(f"    length: {length}")
             values_bytes: List[bytes] = [input_stream.read(1) for _ in range(0, length)]
 
             extra = 4 - (length % 4)
-            print(f"    extra: {extra}")
             if extra < 4:
                 for _ in range(0, extra):
                     input_stream.read(1)
@@ -319,7 +265,6 @@ class TranslationTable:
             return values_bytes
         elif v == VariantBin.VARIANT_INT32_ARRAY:
             length = int.from_bytes(input_stream.read(4), endian)
-            print(f"    length: {length}")
             values_ints: List[int] = [
                 int.from_bytes(input_stream.read(4), endian) for _ in range(0, length)
             ]
