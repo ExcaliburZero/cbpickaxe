@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, IO, List, Optional, Sequence, Union
+from typing import IO, List, Optional, Union
 
 import godot_parser as gp
 
@@ -84,6 +84,7 @@ class MonsterForm:
         tape_upgrades: Optional[List[Union[TapeUpgrade, str]]] = None
 
         for section in scene.get_sections():
+            # pylint: disable-next=unidiomatic-typecheck
             if type(section) == gp.GDResourceSection:
                 name = section["name"]
                 bestiary_index = section["bestiary_index"]
@@ -205,11 +206,3 @@ class MonsterForm:
             evolutions.append(Evolution(name=name, evolved_form=evolved_form))
 
         return evolutions
-
-
-if __name__ == "__main__":
-    with open("data/traffikrab.tres", "r") as input_stream:
-        monster_form = MonsterForm.from_tres(input_stream)
-        print(monster_form)
-        print(monster_form.move_slots)
-        print(monster_form.max_move_slots)

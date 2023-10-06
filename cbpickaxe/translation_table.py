@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import cast, Dict, IO, List, Literal, Optional, Tuple, Union
+from typing import cast, IO, List, Literal, Optional, Tuple, Union
 
 import enum
 
@@ -104,17 +104,17 @@ class TranslationTable:
         assert header == "RSRC"
 
         big_endian = input_stream.read(4) != b"\x00\x00\x00\x00"
-        use_real64 = input_stream.read(4) != b"\x00\x00\x00\x00"
+        _use_real64 = input_stream.read(4) != b"\x00\x00\x00\x00"
         endian: Literal["big", "little"] = "big" if big_endian else "little"
 
-        engine_ver_major = int.from_bytes(input_stream.read(4), endian)
-        engine_ver_minor = int.from_bytes(input_stream.read(4), endian)
-        ver_format_bin = int.from_bytes(input_stream.read(4), endian)
+        _engine_ver_major = int.from_bytes(input_stream.read(4), endian)
+        _engine_ver_minor = int.from_bytes(input_stream.read(4), endian)
+        _ver_format_bin = int.from_bytes(input_stream.read(4), endian)
 
-        resource_type = TranslationTable.__read_unicode_string(input_stream, endian)
+        _resource_type = TranslationTable.__read_unicode_string(input_stream, endian)
 
-        importmd_ofs = int.from_bytes(input_stream.read(8), endian)
-        flags = int.from_bytes(input_stream.read(4), endian)
+        _importmd_ofs = int.from_bytes(input_stream.read(8), endian)
+        _flags = int.from_bytes(input_stream.read(4), endian)
 
         # Skip over res_uid field
         input_stream.read(8)
@@ -141,15 +141,12 @@ class TranslationTable:
             for _ in range(0, int_resources_size)
         ]
 
-        for i, (path, offset) in enumerate(int_resources):
+        for i, (_, offset) in enumerate(int_resources):
             main = i == (len(int_resources) - 1)
             assert main
 
-            # TODO: local path???
-            # https://github.com/bruvzg/gdsdecomp/blob/4314628d790d2d37c78ad7855e3a0e21dfaf0677/compat/resource_loader_compat.cpp#L914
-
             input_stream.seek(offset)
-            rtype = TranslationTable.__read_unicode_string(input_stream, endian)
+            _rtype = TranslationTable.__read_unicode_string(input_stream, endian)
 
             pc = int.from_bytes(input_stream.read(4), endian)
 
@@ -201,15 +198,15 @@ class TranslationTable:
     ) -> str:
         h = TranslationTable.__hash(0, string)
 
-        hash = hashes[h % len(hashes)]
+        h_hash = hashes[h % len(hashes)]
 
-        assert isinstance(hash, int)
-        if hash == 0xFFFFFFFF:
+        assert isinstance(h_hash, int)
+        if h_hash == 0xFFFFFFFF:
             raise KeyError(string)
 
         buckets = cast(List[int], buckets)
-        bucket_size = buckets[hash]
-        bucket = Bucket.from_ints(buckets[hash : hash + 2 + 4 * bucket_size])
+        bucket_size = buckets[h_hash]
+        bucket = Bucket.from_ints(buckets[h_hash : h_hash + 2 + 4 * bucket_size])
 
         h = TranslationTable.__hash(bucket.func, string)
 
@@ -244,23 +241,6 @@ class TranslationTable:
         return d
 
     @staticmethod
-    def __split_list(l: List[bytes], value: bytes) -> List[bytes]:
-        groups = []
-
-        buffer: List[bytes] = []
-        for v in l:
-            if v == value:
-                groups.append(buffer)
-                buffer = []
-            else:
-                buffer.append(v)
-
-        if len(buffer) > 0:
-            groups.append(buffer)
-
-        return [b"".join(g) for g in groups]
-
-    @staticmethod
     def __get_string(
         input_stream: IO[bytes], endian: Literal["big", "little"], string_map: List[str]
     ) -> str:
@@ -287,7 +267,7 @@ class TranslationTable:
         v = VariantBin(t)
         if v == VariantBin.VARIANT_STRING:
             return TranslationTable.__read_unicode_string(input_stream, endian)
-        if v == VariantBin.VARIANT_RAW_ARRAY:
+        elif v == VariantBin.VARIANT_RAW_ARRAY:
             length = int.from_bytes(input_stream.read(4), endian)
             values_bytes: List[bytes] = [input_stream.read(1) for _ in range(0, length)]
 
