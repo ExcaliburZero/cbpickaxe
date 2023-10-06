@@ -32,6 +32,9 @@ jobs:
     - name: Lint with black
       run: |
         black --check **/*.py
+    - name: Lint with pylint
+      run: |
+        pylint cbpickaxe/*.py
     - name: Run regression tests
       run: |
         make regression_test
