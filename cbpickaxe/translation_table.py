@@ -214,7 +214,7 @@ class TranslationTable:
         """
         try:
             return self[key]
-        except ValueError as e:
+        except KeyError as e:
             if default is not None:
                 return default
             else:
