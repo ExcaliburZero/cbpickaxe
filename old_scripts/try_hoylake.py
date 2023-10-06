@@ -25,8 +25,26 @@ def main(argv: List[str]) -> int:
     for root in args.roots:
         hoylake.load_root(pathlib.Path(root))
 
-    for path, move in hoylake.load_moves("res://data/battle_moves/").items():
+    _ = hoylake.load_monster_forms("res://data/monster_forms/")
+    _ = hoylake.load_monster_forms("res://data/monster_forms_secret/")
+
+    move = hoylake.load_move("res://data/battle_moves/carnivore.tres")
+    for path, monster_form in hoylake.get_monster_forms_by_tags(move.tags).items():
+        print(path, monster_form)
+
+    print("==========================")
+    print("==========================")
+    print("==========================")
+
+    _ = hoylake.load_moves("res://data/battle_moves/")
+
+    monster_form = hoylake.load_monster_form(
+        "res://data/monster_forms/shining_kuneko.tres"
+    )
+    for path, move in hoylake.get_moves_by_tags(monster_form.move_tags).items():
         print(path, move)
+
+    print(len(hoylake.get_moves_by_tags(monster_form.move_tags + ["any"])))
 
     return SUCCESS
 

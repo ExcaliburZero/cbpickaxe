@@ -2,7 +2,7 @@
 Classes related to monster forms (species).
 """
 from dataclasses import dataclass
-from typing import IO, List, Optional, Union
+from typing import cast, IO, List, Optional, Union
 
 import godot_parser as gp
 
@@ -64,6 +64,7 @@ class MonsterForm:
     move_slots: int
     evolutions: List[Evolution]
     bestiary_index: int
+    move_tags: List[str]
     tape_upgrades: List[Union[TapeUpgrade, str]]
 
     @property
@@ -105,6 +106,7 @@ class MonsterForm:
         evasion = None
         max_ap = None
         evolutions = None
+        move_tags = None
         tape_upgrades: Optional[List[Union[TapeUpgrade, str]]] = None
 
         for section in scene.get_sections():
@@ -126,6 +128,7 @@ class MonsterForm:
                 accuracy = section["accuracy"]
                 evasion = section["evasion"]
                 max_ap = section["max_ap"]
+                move_tags = section["move_tags"]
 
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
                 elemental_types = MonsterForm.__parse_elemental_types(scene, section)
@@ -147,8 +150,13 @@ class MonsterForm:
         assert isinstance(accuracy, int)
         assert isinstance(evasion, int)
         assert isinstance(max_ap, int)
+        assert isinstance(move_tags, list)
         assert tape_upgrades is not None
         assert evolutions is not None
+
+        for tag in move_tags:
+            assert isinstance(tag, str)
+        move_tags = cast(List[str], move_tags)
 
         return MonsterForm(
             name=name,
@@ -169,6 +177,7 @@ class MonsterForm:
             move_slots=move_slots,
             evolutions=evolutions,
             bestiary_index=bestiary_index,
+            move_tags=move_tags,
             tape_upgrades=tape_upgrades,
         )
 

@@ -1,7 +1,7 @@
 """
 Code for loading in data files and querying data from them.
 """
-from typing import Dict, List
+from typing import Dict, List, Iterable
 
 import collections
 import logging
@@ -191,6 +191,30 @@ class Hoylake:
                 pass
 
         raise KeyError(string)
+
+    def get_monster_forms_by_tags(self, tags: Iterable[str]) -> Dict[str, MonsterForm]:
+        """
+        Returns all of the monster forms that have any of the given tags.
+        """
+        monster_forms = {}
+        for tag in tags:
+            for path, monster_form in self.__monster_forms.items():
+                if tag in monster_form.move_tags:
+                    monster_forms[f"res://{path}"] = monster_form
+
+        return monster_forms
+
+    def get_moves_by_tags(self, tags: Iterable[str]) -> Dict[str, Move]:
+        """
+        Returns all of the moves that have any of the given tags.
+        """
+        moves = {}
+        for tag in tags:
+            for path, move in self.__moves.items():
+                if tag in move.tags:
+                    moves[f"res://{path}"] = move
+
+        return moves
 
     def __check_if_root_loaded(self) -> None:
         if len(self.__roots) == 0:
