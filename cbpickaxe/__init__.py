@@ -1,2 +1,2 @@
-from .monster_form import *
-from .translation_table import *
+from .monster_form import Evolution, MonsterForm, TapeUpgrade
+from .translation_table import TranslationTable

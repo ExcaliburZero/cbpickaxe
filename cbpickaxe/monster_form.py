@@ -23,6 +23,7 @@ class TapeUpgrade:
 @dataclass
 class Evolution:
     name: str
+    evolved_form: str
 
 
 @dataclass
@@ -194,9 +195,14 @@ class MonsterForm:
 
             name = sub_resource["resource_name"]
 
+            evolved_form_raw = sub_resource["evolved_form"]
+            ext_resource = scene.find_ext_resource(id=evolved_form_raw.id)
+            assert ext_resource is not None
+            evolved_form = ext_resource.path
+
             assert isinstance(name, str)
 
-            evolutions.append(Evolution(name=name))
+            evolutions.append(Evolution(name=name, evolved_form=evolved_form))
 
         return evolutions
 
