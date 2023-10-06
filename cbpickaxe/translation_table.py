@@ -99,7 +99,7 @@ class TranslationTable:
         self.__strings = strings
 
     @staticmethod
-    def from_translation(input_stream: IO[bytes]) -> "TranslationTable":
+    def from_translation(input_stream: IO[bytes]) -> Tuple["TranslationTable", str]:
         header = input_stream.read(4).decode("ascii")
         assert header == "RSRC"
 
@@ -168,10 +168,13 @@ class TranslationTable:
             buckets = properties_by_name["bucket_table"]
             strings = properties_by_name["strings"]
 
+            locale = properties_by_name.get("locale", "en")
+            assert isinstance(locale, str)
+
             assert isinstance(strings[0], bytes)
             strings = cast(List[bytes], strings)
 
-            return TranslationTable(hashes, buckets, strings)
+            return TranslationTable(hashes, buckets, strings), locale
 
         raise NotImplementedError()
 

@@ -37,7 +37,7 @@ def main(argv: List[str]) -> int:
         with open(translation_filepath, "rb") as input_stream:
             translation_table = cbp.TranslationTable.from_translation(input_stream)
 
-        tables[translation_filepath] = translation_table
+        tables[translation_filepath], _ = translation_table
 
     locales = {
         translation_filepath: pathlib.Path(translation_filepath).name.split(".")[-2]
