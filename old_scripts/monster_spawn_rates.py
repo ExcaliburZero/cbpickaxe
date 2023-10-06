@@ -28,7 +28,12 @@ def main(argv: List[str]) -> int:
 
     for spawn_filepath in args.monster_spawn_profiles:
         with open(spawn_filepath, "r") as input_stream:
-            monster_spawn_profile = MonsterSpawnProfile.from_tres(input_stream)
+            try:
+                monster_spawn_profile = MonsterSpawnProfile.from_tres(input_stream)
+            except Exception as e:
+                raise Exception(
+                    f"Failed to load monster spawn profile table: {spawn_filepath}"
+                ) from e
 
         print(monster_spawn_profile)
 
