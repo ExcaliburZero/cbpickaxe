@@ -1,3 +1,6 @@
+"""
+Code for loading in data files and querying data from them.
+"""
 from typing import Dict, List
 
 import collections
@@ -11,6 +14,10 @@ RelativeResPath = pathlib.Path
 
 
 class Hoylake:
+    """
+    A class that handles loading in data files from the decompiled game.
+    """
+
     def __init__(self) -> None:
         self.__roots: List[pathlib.Path] = []
         self.__translation_tables: collections.defaultdict[
@@ -20,12 +27,30 @@ class Hoylake:
         self.__monster_forms: Dict[RelativeResPath, MonsterForm] = {}
 
     def load_root(self, new_root: pathlib.Path) -> None:
+        """
+        Adds the given root directory to the list of known root directories.
+
+        Can be called multiple times in order to load multiple root directories
+        (ex. base game, DLC, mods).
+
+        Must be run at least once before loading in any files (ex. monster forms).
+        """
         logging.info(f"Loading new root directory: {new_root}")
 
         self.__roots.append(new_root)
         self.__load_translation_tables(new_root)
 
     def load_monster_form(self, path: str) -> MonsterForm:
+        """
+        Loads in the monster form at the given res:// filepath.
+
+        Must have loaded at least one root before running.
+
+        If there is no monster form file at that location in any of the loaded root directories,
+        then a ValueError will be raised.
+        """
+        self.__check_if_root_loaded()
+
         relative_path = Hoylake.__parse_res_path(path)
 
         if relative_path in self.__monster_forms:
@@ -43,6 +68,15 @@ class Hoylake:
         raise ValueError(f"Could not find monster file at path: {path}")
 
     def load_monster_forms(self, path: str) -> Dict[str, MonsterForm]:
+        """
+        Loads in all of the monster forms within the given res:// directory path.
+
+        Looks for that path in all of the loaded root directories.
+
+        Must have loaded at least one root before running.
+        """
+        self.__check_if_root_loaded()
+
         relative_path = Hoylake.__parse_res_path(path)
 
         monster_forms: Dict[str, MonsterForm] = {}
@@ -62,6 +96,19 @@ class Hoylake:
         return monster_forms
 
     def translate(self, string: str, locale: str = "en") -> str:
+        """
+        Translates the given string to the specified locale. Locale defaults to English (en).
+
+        Must have loaded at least one root before running.
+
+        If the string is not found for the given locale in any of the translation tables in any of
+        the loaded root directories, then a KeyError will raised.
+
+        If no translation tables have been loaded for the given locale, then a ValueError will be
+        raised.
+        """
+        self.__check_if_root_loaded()
+
         if locale not in self.__translation_tables:
             raise ValueError(
                 f"No translation tables for locale '{locale}' have been loaded. Only loaded locales are: {','.join(sorted(self.__translation_tables.keys()))}"
@@ -74,6 +121,12 @@ class Hoylake:
                 pass
 
         raise KeyError(string)
+
+    def __check_if_root_loaded(self) -> None:
+        if len(self.__roots) == 0:
+            raise RuntimeError(
+                "No roots have been loaded. You must load a root with `hoylake.load_root` before querying."
+            )
 
     def __load_translation_tables(self, root: pathlib.Path) -> None:
         logging.info(f"Looking for translation files in root: {root}")
