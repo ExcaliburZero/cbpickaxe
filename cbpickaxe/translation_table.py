@@ -192,6 +192,7 @@ class TranslationTable:
 
             locale = properties_by_name.get("locale", "en")
             assert isinstance(locale, str)
+            locale = locale.replace("\x00", "")
 
             assert isinstance(strings[0], bytes)
             strings = cast(List[bytes], strings)

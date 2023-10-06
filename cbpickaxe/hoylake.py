@@ -1,7 +1,7 @@
 """
 Code for loading in data files and querying data from them.
 """
-from typing import Dict, List, Iterable
+from typing import Dict, List, Iterable, Set
 
 import collections
 import logging
@@ -191,6 +191,12 @@ class Hoylake:
                 pass
 
         raise KeyError(string)
+
+    def get_locales(self) -> Set[str]:
+        """
+        Returns a set of the locales (languages) that translation files have been loaded in for.
+        """
+        return set(self.__translation_tables.keys())
 
     def get_monster_forms_by_tags(self, tags: Iterable[str]) -> Dict[str, MonsterForm]:
         """
