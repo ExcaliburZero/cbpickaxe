@@ -25,19 +25,10 @@ def main(argv: List[str]) -> int:
     for root in args.roots:
         hoylake.load_root(pathlib.Path(root))
 
-    traffikrab = hoylake.load_monster_form("res://data/monster_forms/traffikrab.tres")
-    print(traffikrab)
-    print(hoylake.translate(traffikrab.name))
-    print(hoylake.translate(traffikrab.description))
-    for form in traffikrab.evolutions:
-        evo = hoylake.load_monster_form(form.evolved_form)
-        print(evo)
-
-    traffikrabdos = hoylake.load_monster_form(
-        "res://mods/de_example_monster/traffikrabdos.tres"
-    )
-    print(traffikrabdos)
-    print(hoylake.translate(traffikrabdos.description))
+    for path, monster_form in hoylake.load_monster_forms(
+        "res://data/monster_forms/"
+    ).items():
+        print(path, monster_form)
 
     return SUCCESS
 

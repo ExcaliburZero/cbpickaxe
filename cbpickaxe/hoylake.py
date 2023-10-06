@@ -42,6 +42,25 @@ class Hoylake:
 
         raise ValueError(f"Could not find monster file at path: {path}")
 
+    def load_monster_forms(self, path: str) -> Dict[str, MonsterForm]:
+        relative_path = Hoylake.__parse_res_path(path)
+
+        monster_forms: Dict[str, MonsterForm] = {}
+        for root in self.__roots:
+            monsters_dir_path = root / relative_path
+            if monsters_dir_path.exists():
+                monster_paths = sorted(monsters_dir_path.glob("*.tres"))
+                for monster_path in monster_paths:
+                    with open(monster_path, "r") as input_stream:
+                        monster_form = MonsterForm.from_tres(input_stream)
+                        self.__monster_forms[relative_path] = monster_form
+
+                        monster_relative_path = relative_path / monster_path.name
+                        monster_forms[f"res://{monster_relative_path}"] = monster_form
+                        self.__monster_forms[monster_relative_path] = monster_form
+
+        return monster_forms
+
     def translate(self, string: str, locale: str = "en") -> str:
         if locale not in self.__translation_tables:
             raise ValueError(
