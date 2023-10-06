@@ -8,6 +8,7 @@ import logging
 import pathlib
 
 from .monster_form import MonsterForm
+from .move import Move
 from .translation_table import TranslationTable
 
 RelativeResPath = pathlib.Path
@@ -25,6 +26,7 @@ class Hoylake:
         ] = collections.defaultdict(lambda: [])
 
         self.__monster_forms: Dict[RelativeResPath, MonsterForm] = {}
+        self.__moves: Dict[RelativeResPath, Move] = {}
 
     def load_root(self, new_root: pathlib.Path) -> None:
         """
@@ -87,13 +89,74 @@ class Hoylake:
                 for monster_path in monster_paths:
                     with open(monster_path, "r", encoding="utf-8") as input_stream:
                         monster_form = MonsterForm.from_tres(input_stream)
-                        self.__monster_forms[relative_path] = monster_form
 
                         monster_relative_path = relative_path / monster_path.name
                         monster_forms[f"res://{monster_relative_path}"] = monster_form
                         self.__monster_forms[monster_relative_path] = monster_form
 
         return monster_forms
+
+    def load_move(self, path: str) -> Move:
+        """
+        Loads in the move at the given res:// filepath.
+
+        Must have loaded at least one root before running.
+
+        If there is no move file at that location in any of the loaded root directories, then a
+        ValueError will be raised.
+        """
+        self.__check_if_root_loaded()
+
+        relative_path = Hoylake.__parse_res_path(path)
+
+        if relative_path in self.__moves:
+            return self.__moves[relative_path]
+
+        for root in self.__roots:
+            move_path = root / relative_path
+            if move_path.exists():
+                with open(move_path, "r", encoding="utf-8") as input_stream:
+                    move = Move.from_tres(input_stream)
+                    self.__moves[relative_path] = move
+
+                    return move
+
+        raise ValueError(f"Could not find monster file at path: {path}")
+
+    def load_moves(self, path: str) -> Dict[str, Move]:
+        """
+        Loads in all of the moves within the given res:// directory path.
+
+        Looks for that path in all of the loaded root directories.
+
+        Must have loaded at least one root before running.
+        """
+        self.__check_if_root_loaded()
+
+        relative_path = Hoylake.__parse_res_path(path)
+
+        moves: Dict[str, Move] = {}
+        for root in self.__roots:
+            moves_dir_path = root / relative_path
+            if moves_dir_path.exists():
+                move_paths = sorted(moves_dir_path.glob("*.tres"))
+                for move_path in move_paths:
+                    move_relative_path = relative_path / move_path.name
+
+                    if move_relative_path in self.__moves:
+                        moves[f"res://{move_relative_path}"] = self.__moves[
+                            move_relative_path
+                        ]
+                        continue
+
+                    with open(move_path, "r", encoding="utf-8") as input_stream:
+                        move = Move.from_tres(input_stream)
+
+                        move_relative_path = relative_path / move_path.name
+                        moves[f"res://{move_relative_path}"] = move
+                        self.__moves[move_relative_path] = move
+
+        return moves
 
     def translate(self, string: str, locale: str = "en") -> str:
         """

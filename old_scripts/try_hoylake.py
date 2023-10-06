@@ -25,10 +25,8 @@ def main(argv: List[str]) -> int:
     for root in args.roots:
         hoylake.load_root(pathlib.Path(root))
 
-    for path, monster_form in hoylake.load_monster_forms(
-        "res://data/monster_forms/"
-    ).items():
-        print(path, monster_form)
+    for path, move in hoylake.load_moves("res://data/battle_moves/").items():
+        print(path, move)
 
     return SUCCESS
 
