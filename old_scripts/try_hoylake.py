@@ -33,6 +33,12 @@ def main(argv: List[str]) -> int:
         evo = hoylake.load_monster_form(form.evolved_form)
         print(evo)
 
+    traffikrabdos = hoylake.load_monster_form(
+        "res://mods/de_example_monster/traffikrabdos.tres"
+    )
+    print(traffikrabdos)
+    print(hoylake.translate(traffikrabdos.description))
+
     return SUCCESS
 
 

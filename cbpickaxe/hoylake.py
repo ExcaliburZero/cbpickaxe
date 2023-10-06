@@ -57,14 +57,11 @@ class Hoylake:
         raise KeyError(string)
 
     def __load_translation_tables(self, root: pathlib.Path) -> None:
-        translation_dir = root / "translation"
-        logging.info(f"Looking for translation directory: {translation_dir}")
-        if not translation_dir.exists():
-            logging.info(f"No translation directory in new root: {root}")
-            return
-
-        logging.info(f"Translation directory exists, loading translation files...")
-        translation_filepaths = sorted(translation_dir.glob("*.translation"))
+        logging.info(f"Looking for translation files in root: {root}")
+        translation_filepaths = sorted(root.glob("**/*.translation"))
+        logging.debug(
+            f"Found {len(translation_filepaths)} translation files in: {root}"
+        )
         for translation_filepath in translation_filepaths:
             logging.debug(f"Trying to load translation file: {translation_filepath}")
             with open(translation_filepath, "rb") as input_stream:
