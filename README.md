@@ -1,4 +1,4 @@
-# cbpickaxe
+# cbpickaxe [![Python library](https://github.com/ExcaliburZero/cbpickaxe/actions/workflows/python-library.yml/badge.svg)](https://github.com/ExcaliburZero/cbpickaxe/actions/workflows/python-library.yml)
 A Python library and set of scripts for data mining the game Cassette Beasts.
 
 ```python
