@@ -87,14 +87,19 @@ class Bucket:
         )
 
 
-@dataclass
 class TranslationTable:
-    messages: Dict[str, str]
+    def __init__(
+        self,
+        hashes: PropertyValue,
+        buckets: PropertyValue,
+        strings: List[bytes],
+    ) -> None:
+        self.__hashes = hashes
+        self.__buckets = buckets
+        self.__strings = strings
 
     @staticmethod
-    def from_translation(
-        input_stream: IO[bytes], strings_to_translate: List[str]
-    ) -> "TranslationTable":
+    def from_translation(input_stream: IO[bytes]) -> "TranslationTable":
         header = input_stream.read(4).decode("ascii")
         assert header == "RSRC"
 
@@ -166,18 +171,23 @@ class TranslationTable:
             assert isinstance(strings[0], bytes)
             strings = cast(List[bytes], strings)
 
-            messages: Dict[str, str] = {}
-            for string in strings_to_translate:
-                try:
-                    messages[string] = TranslationTable.__get(
-                        hashes, buckets, strings, string
-                    )
-                except KeyError:
-                    pass
-
-            return TranslationTable(messages)
+            return TranslationTable(hashes, buckets, strings)
 
         raise NotImplementedError()
+
+    def __getitem__(self, key: str) -> str:
+        return TranslationTable.__get(
+            self.__hashes, self.__buckets, self.__strings, key
+        )
+
+    def get(self, key: str, default: Optional[str] = None) -> str:
+        try:
+            return self[key]
+        except ValueError as e:
+            if default is not None:
+                return default
+            else:
+                raise e
 
     @staticmethod
     def __get(

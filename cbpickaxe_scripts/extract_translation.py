@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import argparse
 import csv
@@ -32,12 +32,10 @@ def main(argv: List[str]) -> int:
 
                 strings_to_translate.append(line)
 
-    tables = {}
+    tables: Dict[str, cbp.TranslationTable] = {}
     for translation_filepath in args.translation_files:
         with open(translation_filepath, "rb") as input_stream:
-            translation_table = cbp.TranslationTable.from_translation(
-                input_stream, strings_to_translate
-            )
+            translation_table = cbp.TranslationTable.from_translation(input_stream)
 
         tables[translation_filepath] = translation_table
 
@@ -58,7 +56,7 @@ def main(argv: List[str]) -> int:
             }
             for name, table in tables.items():
                 locale = locales[name]
-                message = table.messages.get(i, "")
+                message = table.get(i, "")
                 assert isinstance(message, str)
 
                 if message != "":
