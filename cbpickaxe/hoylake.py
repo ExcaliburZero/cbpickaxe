@@ -87,6 +87,14 @@ class Hoylake:
             if monsters_dir_path.exists():
                 monster_paths = sorted(monsters_dir_path.glob("*.tres"))
                 for monster_path in monster_paths:
+                    monster_relative_path = relative_path / monster_path.name
+
+                    if monster_relative_path in self.__monster_forms:
+                        monster_forms[
+                            f"res://{monster_relative_path}"
+                        ] = self.__monster_forms[monster_relative_path]
+                        continue
+
                     with open(monster_path, "r", encoding="utf-8") as input_stream:
                         monster_form = MonsterForm.from_tres(input_stream)
 
@@ -152,7 +160,6 @@ class Hoylake:
                     with open(move_path, "r", encoding="utf-8") as input_stream:
                         move = Move.from_tres(input_stream)
 
-                        move_relative_path = relative_path / move_path.name
                         moves[f"res://{move_relative_path}"] = move
                         self.__moves[move_relative_path] = move
 
