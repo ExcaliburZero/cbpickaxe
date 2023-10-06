@@ -168,38 +168,54 @@ class TranslationTable:
 
             messages: Dict[str, str] = {}
             for string in strings_to_translate:
-                h = TranslationTable.__hash(0, string)
-
-                hash = hashes[h % len(hashes)]
-
-                assert isinstance(hash, int)
-                if hash == 0xFFFFFFFF:
-                    continue
-
-                buckets = cast(List[int], buckets)
-                bucket_size = buckets[hash]
-                bucket = Bucket.from_ints(buckets[hash : hash + 2 + 4 * bucket_size])
-
-                h = TranslationTable.__hash(bucket.func, string)
-
-                for e in bucket.elements:
-                    if e.key == h:
-                        value_bytes = b"".join(
-                            strings[e.str_offset : e.str_offset + e.comp_size]
-                        )
-
-                        if e.comp_size == e.uncomp_size:
-                            value = value_bytes.decode("utf8")
-                        else:
-                            value = smaz.decompress(value_bytes)
-
-                        assert isinstance(value, str)
-
-                        messages[string] = value.rstrip("\x00")
+                try:
+                    messages[string] = TranslationTable.__get(
+                        hashes, buckets, strings, string
+                    )
+                except KeyError:
+                    pass
 
             return TranslationTable(messages)
 
         raise NotImplementedError()
+
+    @staticmethod
+    def __get(
+        hashes: PropertyValue,
+        buckets: PropertyValue,
+        strings: List[bytes],
+        string: str,
+    ) -> str:
+        h = TranslationTable.__hash(0, string)
+
+        hash = hashes[h % len(hashes)]
+
+        assert isinstance(hash, int)
+        if hash == 0xFFFFFFFF:
+            raise KeyError(string)
+
+        buckets = cast(List[int], buckets)
+        bucket_size = buckets[hash]
+        bucket = Bucket.from_ints(buckets[hash : hash + 2 + 4 * bucket_size])
+
+        h = TranslationTable.__hash(bucket.func, string)
+
+        for e in bucket.elements:
+            if e.key == h:
+                value_bytes = b"".join(
+                    strings[e.str_offset : e.str_offset + e.comp_size]
+                )
+
+                if e.comp_size == e.uncomp_size:
+                    value = value_bytes.decode("utf8")
+                else:
+                    value = smaz.decompress(value_bytes)
+
+                assert isinstance(value, str)
+
+                return value.rstrip("\x00")
+
+        raise KeyError(string)
 
     @staticmethod
     def __hash(d: int, value: str) -> int:
