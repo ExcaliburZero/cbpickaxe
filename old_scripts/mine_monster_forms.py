@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import argparse
 import dataclasses
@@ -19,16 +19,16 @@ def main(argv: List[str]) -> int:
 
     args = parser.parse_args(argv)
 
-    monster_forms: Dict[int, cbp.MonsterForm] = {}
+    monster_forms: List[Tuple[int, cbp.MonsterForm]] = []
     for input_file in args.monster_form_tres_files:
         with open(input_file, "r") as input_stream:
             monster_form = cbp.MonsterForm.from_tres(input_stream)
 
-        monster_forms[monster_form.bestiary_index] = monster_form
+        monster_forms.append((monster_form.bestiary_index, monster_form))
 
     with open(pathlib.Path("data") / "monster_forms.json", "w") as output_stream:
         data = []
-        for _, monster_form in sorted(monster_forms.items()):
+        for _, monster_form in sorted(monster_forms, key=lambda e: (e[0], e[1].name)):
             data.append(dataclasses.asdict(monster_form))
 
         json.dump(data, output_stream, indent=4)
