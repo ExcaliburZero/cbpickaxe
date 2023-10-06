@@ -1,3 +1,6 @@
+"""
+Classes related to translating in-game string ids to localized strings.
+"""
 from dataclasses import dataclass
 from typing import cast, IO, List, Literal, Optional, Tuple, Union
 
@@ -6,88 +9,103 @@ import enum
 import smaz
 
 
-PropertyValue = Union[List[bytes], List[int], str]
-
-
-class VariantBin(enum.Enum):
-    VARIANT_NIL = 1
-    VARIANT_BOOL = 2
-    VARIANT_INT = 3
-    VARIANT_REAL = 4
-    VARIANT_FLOAT = 4
-    VARIANT_STRING = 5
-    VARIANT_VECTOR2 = 10
-    VARIANT_RECT2 = 11
-    VARIANT_VECTOR3 = 12
-    VARIANT_PLANE = 13
-    VARIANT_QUAT = 14
-    VARIANT_AABB = 15
-    VARIANT_MATRIX3 = 16
-    VARIANT_TRANSFORM = 17
-    VARIANT_MATRIX32 = 18
-    VARIANT_COLOR = 20
-    VARIANT_IMAGE = 21
-    VARIANT_NODE_PATH = 22
-    VARIANT_RID = 23
-    VARIANT_OBJECT = 24
-    VARIANT_INPUT_EVENT = 25
-    VARIANT_DICTIONARY = 26
-    VARIANT_ARRAY = 30
-    VARIANT_RAW_ARRAY = 31
-    VARIANT_INT_ARRAY = 32
-    VARIANT_INT32_ARRAY = 32
-    VARIANT_REAL_ARRAY = 33
-    VARIANT_FLOAT32_ARRAY = 33
-    VARIANT_STRING_ARRAY = 34
-    VARIANT_VECTOR3_ARRAY = 35
-    VARIANT_COLOR_ARRAY = 36
-    VARIANT_VECTOR2_ARRAY = 37
-    VARIANT_INT64 = 40
-    VARIANT_DOUBLE = 41
-    VARIANT_CALLABLE = 42
-    VARIANT_SIGNAL = 43
-    VARIANT_STRING_NAME = 44
-    VARIANT_VECTOR2I = 45
-    VARIANT_RECT2I = 46
-    VARIANT_VECTOR3I = 47
-    VARIANT_PACKED_INT64_ARRAY = 48
-    VARIANT_PACKED_FLOAT64_ARRAY = 49
-    VARIANT_VECTOR4 = 50
-    VARIANT_VECTOR4I = 51
-    VARIANT_PROJECTION = 52
-
-
-@dataclass
-class BucketElement:
-    key: int
-    str_offset: int
-    comp_size: int
-    uncomp_size: int
-
-    @staticmethod
-    def from_ints(ints: List[int]) -> "BucketElement":
-        return BucketElement(*ints)
-
-
-@dataclass
-class Bucket:
-    size: int
-    func: int
-    elements: List[BucketElement]
-
-    @staticmethod
-    def from_ints(ints: List[int]) -> "Bucket":
-        return Bucket(
-            ints[0],
-            ints[1],
-            [
-                BucketElement.from_ints(ints[2 + i * 4 : 2 + (i + 1) * 4])
-                for i in range(0, ints[0])
-            ],
-        )
-
-
 class TranslationTable:
+    """
+    Key value mapping of in-game string ids to localized strings.
+
+    This mapping does not store the strings, because the Godot ".translation" files that we load
+    the data from do not store they keys. Thos files only store hashes of the keys, hash buckets
+    for looking up the localized strings, and the localized strings.
+    """
+
+    PropertyValue = Union[List[bytes], List[int], str]
+
+    class _VariantBin(enum.Enum):
+        VARIANT_NIL = 1
+        VARIANT_BOOL = 2
+        VARIANT_INT = 3
+        VARIANT_REAL = 4
+        VARIANT_FLOAT = 4
+        VARIANT_STRING = 5
+        VARIANT_VECTOR2 = 10
+        VARIANT_RECT2 = 11
+        VARIANT_VECTOR3 = 12
+        VARIANT_PLANE = 13
+        VARIANT_QUAT = 14
+        VARIANT_AABB = 15
+        VARIANT_MATRIX3 = 16
+        VARIANT_TRANSFORM = 17
+        VARIANT_MATRIX32 = 18
+        VARIANT_COLOR = 20
+        VARIANT_IMAGE = 21
+        VARIANT_NODE_PATH = 22
+        VARIANT_RID = 23
+        VARIANT_OBJECT = 24
+        VARIANT_INPUT_EVENT = 25
+        VARIANT_DICTIONARY = 26
+        VARIANT_ARRAY = 30
+        VARIANT_RAW_ARRAY = 31
+        VARIANT_INT_ARRAY = 32
+        VARIANT_INT32_ARRAY = 32
+        VARIANT_REAL_ARRAY = 33
+        VARIANT_FLOAT32_ARRAY = 33
+        VARIANT_STRING_ARRAY = 34
+        VARIANT_VECTOR3_ARRAY = 35
+        VARIANT_COLOR_ARRAY = 36
+        VARIANT_VECTOR2_ARRAY = 37
+        VARIANT_INT64 = 40
+        VARIANT_DOUBLE = 41
+        VARIANT_CALLABLE = 42
+        VARIANT_SIGNAL = 43
+        VARIANT_STRING_NAME = 44
+        VARIANT_VECTOR2I = 45
+        VARIANT_RECT2I = 46
+        VARIANT_VECTOR3I = 47
+        VARIANT_PACKED_INT64_ARRAY = 48
+        VARIANT_PACKED_FLOAT64_ARRAY = 49
+        VARIANT_VECTOR4 = 50
+        VARIANT_VECTOR4I = 51
+        VARIANT_PROJECTION = 52
+
+    @dataclass
+    class _BucketElement:
+        key: int
+        str_offset: int
+        comp_size: int
+        uncomp_size: int
+
+        @staticmethod
+        def from_ints(ints: List[int]) -> "TranslationTable._BucketElement":
+            """
+            Converts ints into a BucketElement.
+            """
+            # pylint: disable-next=protected-access
+            return TranslationTable._BucketElement(*ints)
+
+    @dataclass
+    class _Bucket:
+        size: int
+        func: int
+        elements: List["TranslationTable._BucketElement"]
+
+        @staticmethod
+        def from_ints(ints: List[int]) -> "TranslationTable._Bucket":
+            """
+            Converts ints into a Bucket.
+            """
+            # pylint: disable-next=protected-access
+            return TranslationTable._Bucket(
+                ints[0],
+                ints[1],
+                [
+                    # pylint: disable-next=protected-access
+                    TranslationTable._BucketElement.from_ints(
+                        ints[2 + i * 4 : 2 + (i + 1) * 4]
+                    )
+                    for i in range(0, ints[0])
+                ],
+            )
+
     def __init__(
         self,
         hashes: PropertyValue,
@@ -100,6 +118,13 @@ class TranslationTable:
 
     @staticmethod
     def from_translation(input_stream: IO[bytes]) -> Tuple["TranslationTable", str]:
+        """
+        Creates a TranslationTable from the given binary input stream of a Godot ".translation"
+        file.
+
+        Returns both the table and the locale. The locale defaults to English (en) if no locale is
+        listed in the given ".translation" file.
+        """
         header = input_stream.read(4).decode("ascii")
         assert header == "RSRC"
 
@@ -150,7 +175,7 @@ class TranslationTable:
 
             pc = int.from_bytes(input_stream.read(4), endian)
 
-            properties: List[Tuple[str, PropertyValue]] = []
+            properties: List[Tuple[str, TranslationTable.PropertyValue]] = []
             for _ in range(0, pc):
                 name = TranslationTable.__get_string(input_stream, endian, string_map)
                 variant = TranslationTable.__read_variant(input_stream, endian)
@@ -181,6 +206,12 @@ class TranslationTable:
         )
 
     def get(self, key: str, default: Optional[str] = None) -> str:
+        """
+        Looks up the translation of the given string id.
+
+        If the given string id is not found and a default value was provided, then the default
+        value will be returned.
+        """
         try:
             return self[key]
         except ValueError as e:
@@ -206,7 +237,9 @@ class TranslationTable:
 
         buckets = cast(List[int], buckets)
         bucket_size = buckets[h_hash]
-        bucket = Bucket.from_ints(buckets[h_hash : h_hash + 2 + 4 * bucket_size])
+        bucket = TranslationTable._Bucket.from_ints(
+            buckets[h_hash : h_hash + 2 + 4 * bucket_size]
+        )
 
         h = TranslationTable.__hash(bucket.func, string)
 
@@ -264,10 +297,10 @@ class TranslationTable:
     ) -> PropertyValue:
         t = int.from_bytes(input_stream.read(4), endian)
 
-        v = VariantBin(t)
-        if v == VariantBin.VARIANT_STRING:
+        v = TranslationTable._VariantBin(t)
+        if v == TranslationTable._VariantBin.VARIANT_STRING:
             return TranslationTable.__read_unicode_string(input_stream, endian)
-        elif v == VariantBin.VARIANT_RAW_ARRAY:
+        elif v == TranslationTable._VariantBin.VARIANT_RAW_ARRAY:
             length = int.from_bytes(input_stream.read(4), endian)
             values_bytes: List[bytes] = [input_stream.read(1) for _ in range(0, length)]
 
@@ -277,7 +310,7 @@ class TranslationTable:
                     input_stream.read(1)
 
             return values_bytes
-        elif v == VariantBin.VARIANT_INT32_ARRAY:
+        elif v == TranslationTable._VariantBin.VARIANT_INT32_ARRAY:
             length = int.from_bytes(input_stream.read(4), endian)
             values_ints: List[int] = [
                 int.from_bytes(input_stream.read(4), endian) for _ in range(0, length)

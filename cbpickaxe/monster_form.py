@@ -1,3 +1,6 @@
+"""
+Classes related to monster forms (species).
+"""
 from dataclasses import dataclass
 from typing import IO, List, Optional, Union
 
@@ -6,11 +9,18 @@ import godot_parser as gp
 
 @dataclass
 class TapeUpgrade:
+    """
+    An activity that occurs when a monster tape reaches a specific grade level.
+    """
+
     name: str
     add_slot: bool
 
     @staticmethod
     def from_sub_resource(sub_resource: gp.GDSubResourceSection) -> "TapeUpgrade":
+        """
+        Parses the given sub resource into a TapeUpgrade.
+        """
         name = sub_resource["resource_name"]
         add_slot = sub_resource.get("add_slot", default=False)
 
@@ -22,12 +32,20 @@ class TapeUpgrade:
 
 @dataclass
 class Evolution:
+    """
+    A remastering that a monster tape can undergo.
+    """
+
     name: str
     evolved_form: str
 
 
 @dataclass
 class MonsterForm:
+    """
+    A monster form (species).
+    """
+
     name: str
     elemental_types: List[str]
     exp_yield: int
@@ -50,6 +68,9 @@ class MonsterForm:
 
     @property
     def max_move_slots(self) -> int:
+        """
+        The maximum number of move slots monsters of this form can have (ex. when at grade 5).
+        """
         move_slot_increases = 0
         for upgrade in self.tape_upgrades:
             if isinstance(upgrade, str):
@@ -63,6 +84,9 @@ class MonsterForm:
 
     @staticmethod
     def from_tres(input_stream: IO[str]) -> "MonsterForm":
+        """
+        Parses a MonsterForm from the given Godot ".tres" input stream.
+        """
         scene = gp.parse(input_stream.read())
 
         name = None
