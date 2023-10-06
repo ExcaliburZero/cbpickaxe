@@ -52,7 +52,10 @@ You need to provide it paths to the decompiled copy of the game and decompiled o
 
 You also need to provide the path(s) to the directory of moves that you want the spreadsheet to include.
 ```bash
-cbpickaxe_get_move_users --root "data/Cassette Beasts" data/synergy_is_fun_v1 --move_paths res://mods/synergy_is_fun/battle_moves > move_users.csv
+cbpickaxe_get_move_users \
+    --root "data/Cassette Beasts" data/synergy_is_fun_v1 \
+    --move_paths res://mods/synergy_is_fun/battle_moves \
+    > move_users.csv
 ```
 
 ```bash
