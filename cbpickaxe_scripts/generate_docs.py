@@ -23,6 +23,11 @@ def main(argv: List[str]) -> int:
 
     parser.add_argument("--roots", nargs="+", required=True)
     parser.add_argument(
+        "--move_paths",
+        nargs="+",
+        default=["res://data/battle_moves/"],
+    )
+    parser.add_argument(
         "--monster_form_paths",
         nargs="+",
         default=["res://data/monster_forms/", "res://data/monster_forms_secret/"],
@@ -48,6 +53,9 @@ def main(argv: List[str]) -> int:
     for monsters_path in args.monster_form_paths:
         monster_forms = hoylake.load_monster_forms(monsters_path)
 
+    for moves_path in args.move_paths:
+        _ = hoylake.load_moves(moves_path)
+
     monster_forms_dir = output_directory / "monsters"
     monster_forms_dir.mkdir()
 
@@ -70,12 +78,14 @@ def create_monster_form_page(
     template: j2.Template,
     output_stream: IO[str],
 ) -> None:
+    compatible_moves = hoylake.get_moves_by_tags(monster_form.move_tags + ["all"])
+
     output_stream.write(
         template.render(
             name=hoylake.translate(monster_form.name),
             bestiary_index=f"{monster_form.bestiary_index:03}",
             description=hoylake.translate(monster_form.description),
-            elemental_type=monster_form.elemental_types[0],
+            elemental_type=monster_form.elemental_types[0].capitalize(),
             bestiary_bio_1=hoylake.translate(monster_form.bestiary_bios[0]),
             bestiary_bio_2=hoylake.translate(monster_form.bestiary_bios[1]),
             max_hp=monster_form.max_hp,
@@ -92,6 +102,26 @@ def create_monster_form_page(
             + monster_form.speed,
             max_ap=monster_form.max_ap,
             move_slots=f"{monster_form.move_slots} - {monster_form.max_move_slots}",
+            compatible_moves=sorted(
+                [
+                    {
+                        "name": hoylake.translate(move.name),
+                        "type": move.elemental_types[0].capitalize()
+                        if len(move.elemental_types) > 0
+                        else "None",
+                        "category": hoylake.translate(move.category_name),
+                        "power": move.power if move.power > 0 else "—",
+                        "accuracy": "Unavoidable"
+                        if move.unavoidable
+                        else move.accuracy,
+                        "cost": "Passive"
+                        if move.is_passive_only
+                        else f"{move.cost} AP",
+                    }
+                    for path, move in compatible_moves.items()
+                ],
+                key=lambda m: m["name"],
+            ),
         )
     )
 
