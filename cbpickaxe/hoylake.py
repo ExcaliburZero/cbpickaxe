@@ -43,7 +43,7 @@ class Hoylake:
 
         Must be run at least once before loading in any files (ex. monster forms).
         """
-        logging.info(f"Loading new root directory: {new_root}")
+        logging.debug(f"Loading new root directory: {new_root}")
 
         if name in self.__roots:
             raise ValueError(f"A root with name {name} has already been loaded.")
@@ -290,7 +290,7 @@ class Hoylake:
             )
 
     def __load_translation_tables(self, root: pathlib.Path) -> None:
-        logging.info(f"Looking for translation files in root: {root}")
+        logging.debug(f"Looking for translation files in root: {root}")
         translation_filepaths = sorted(root.glob("**/*.translation"))
         logging.debug(
             f"Found {len(translation_filepaths)} translation files in: {root}"
@@ -303,7 +303,7 @@ class Hoylake:
                 logging.debug(
                     f"Successfully loaded {locale} translation file: {translation_filepath}"
                 )
-        logging.info(
+        logging.debug(
             f"Successfully loaded {len(translation_filepaths)} translation files of locales {','.join(sorted(self.__translation_tables.keys()))}."
         )
 
