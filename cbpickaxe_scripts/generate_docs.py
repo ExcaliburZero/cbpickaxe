@@ -86,6 +86,10 @@ class Config:
         assert isinstance(monster_forms_entry, dict)
         assert isinstance(moves_entry, dict)
 
+        if "cassette_beasts" not in roots:
+            logging.error('roots must contain "cassette_beasts"')
+            raise ValueError()
+
         monster_forms = MonsterForms.from_dict(monster_forms_entry)
         moves = Moves.from_dict(moves_entry)
 
@@ -105,7 +109,11 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     with open(args.config, "rb") as input_stream:
-        config = Config.from_dict(tomllib.load(input_stream))
+        try:
+            config = Config.from_dict(tomllib.load(input_stream))
+        except ValueError:
+            logging.error("Failed to load configration file. See error(s) above.")
+            return FAILURE
 
     env = j2.Environment(
         loader=j2.PackageLoader("cbpickaxe_scripts"), autoescape=j2.select_autoescape()
