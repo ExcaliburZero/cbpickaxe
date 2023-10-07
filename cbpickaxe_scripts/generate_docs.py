@@ -110,6 +110,7 @@ def main(argv: List[str]) -> int:
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--config", nargs="+", default="docs.toml")
+    parser.add_argument("--locale", default="en")
 
     args = parser.parse_args(argv)
 
@@ -129,7 +130,7 @@ def main(argv: List[str]) -> int:
         shutil.rmtree(config.output_directory)
     config.output_directory.mkdir()
 
-    hoylake = cbp.Hoylake()
+    hoylake = cbp.Hoylake(default_locale=args.locale)
     for name, root in config.roots.items():
         hoylake.load_root(name, pathlib.Path(root))
 

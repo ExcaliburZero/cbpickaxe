@@ -1,7 +1,7 @@
 """
 Code for loading in data files and querying data from them.
 """
-from typing import Dict, List, Iterable, Set, Tuple
+from typing import Dict, List, Iterable, Optional, Set, Tuple
 
 import collections
 import json
@@ -22,11 +22,13 @@ class Hoylake:
     A class that handles loading in data files from the decompiled game.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, default_locale: Optional[str] = None) -> None:
         self.__roots: Dict[str, pathlib.Path] = {}
         self.__translation_tables: collections.defaultdict[
             str, List[TranslationTable]
         ] = collections.defaultdict(lambda: [])
+
+        self.__default_locale = default_locale if default_locale is not None else "en"
 
         self.__monster_forms: Dict[RelativeResPath, Tuple[RootName, MonsterForm]] = {}
         self.__moves: Dict[RelativeResPath, Tuple[RootName, Move]] = {}
@@ -229,7 +231,7 @@ class Hoylake:
 
         raise ValueError(f"Could not find file at path: {path}")
 
-    def translate(self, string: str, locale: str = "en") -> str:
+    def translate(self, string: str, locale: Optional[str] = None) -> str:
         """
         Translates the given string to the specified locale. Locale defaults to English (en).
 
@@ -242,6 +244,7 @@ class Hoylake:
         raised.
         """
         self.__check_if_root_loaded()
+        locale = locale if locale is not None else self.__default_locale
 
         if locale not in self.__translation_tables:
             raise ValueError(
