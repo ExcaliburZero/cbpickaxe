@@ -1,7 +1,7 @@
 """
 Code for loading in data files and querying data from them.
 """
-from typing import Dict, List, Iterable, Set
+from typing import Dict, List, Iterable, Set, Tuple
 
 import collections
 import json
@@ -14,6 +14,7 @@ from .move import Move
 from .translation_table import TranslationTable
 
 RelativeResPath = pathlib.Path
+RootName = str
 
 
 class Hoylake:
@@ -27,9 +28,9 @@ class Hoylake:
             str, List[TranslationTable]
         ] = collections.defaultdict(lambda: [])
 
-        self.__monster_forms: Dict[RelativeResPath, MonsterForm] = {}
-        self.__moves: Dict[RelativeResPath, Move] = {}
-        self.__animations: Dict[RelativeResPath, Animation] = {}
+        self.__monster_forms: Dict[RelativeResPath, Tuple[RootName, MonsterForm]] = {}
+        self.__moves: Dict[RelativeResPath, Tuple[RootName, Move]] = {}
+        self.__animations: Dict[RelativeResPath, Tuple[RootName, Animation]] = {}
 
         self.__moves_to_ignore = ["res://data/battle_moves/placeholder.tres"]
 
@@ -64,14 +65,14 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         if relative_path in self.__animations:
-            return self.__animations[relative_path]
+            return self.__animations[relative_path][1]
 
-        for root in self.__roots.values():
+        for root_name, root in self.__roots.items():
             animation_path = root / relative_path
             if animation_path.exists():
                 with open(animation_path, "r", encoding="utf-8") as input_stream:
                     animation = Animation.from_dict(json.load(input_stream))
-                    self.__animations[relative_path] = animation
+                    self.__animations[relative_path] = (root_name, animation)
 
                     return animation
 
@@ -91,14 +92,14 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         if relative_path in self.__monster_forms:
-            return self.__monster_forms[relative_path]
+            return self.__monster_forms[relative_path][1]
 
-        for root in self.__roots.values():
+        for root_name, root in self.__roots.items():
             monster_path = root / relative_path
             if monster_path.exists():
                 with open(monster_path, "r", encoding="utf-8") as input_stream:
                     monster_form = MonsterForm.from_tres(input_stream)
-                    self.__monster_forms[relative_path] = monster_form
+                    self.__monster_forms[relative_path] = (root_name, monster_form)
 
                     return monster_form
 
@@ -117,7 +118,7 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         monster_forms: Dict[str, MonsterForm] = {}
-        for root in self.__roots.values():
+        for root_name, root in self.__roots.items():
             monsters_dir_path = root / relative_path
             if monsters_dir_path.exists():
                 monster_paths = sorted(monsters_dir_path.glob("*.tres"))
@@ -127,7 +128,7 @@ class Hoylake:
                     if monster_relative_path in self.__monster_forms:
                         monster_forms[
                             f"res://{monster_relative_path}"
-                        ] = self.__monster_forms[monster_relative_path]
+                        ] = self.__monster_forms[monster_relative_path][1]
                         continue
 
                     with open(monster_path, "r", encoding="utf-8") as input_stream:
@@ -135,7 +136,10 @@ class Hoylake:
 
                         monster_relative_path = relative_path / monster_path.name
                         monster_forms[f"res://{monster_relative_path}"] = monster_form
-                        self.__monster_forms[monster_relative_path] = monster_form
+                        self.__monster_forms[monster_relative_path] = (
+                            root_name,
+                            monster_form,
+                        )
 
         return monster_forms
 
@@ -153,14 +157,14 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         if relative_path in self.__moves:
-            return self.__moves[relative_path]
+            return self.__moves[relative_path][1]
 
-        for root in self.__roots.values():
+        for root_name, root in self.__roots.items():
             move_path = root / relative_path
             if move_path.exists():
                 with open(move_path, "r", encoding="utf-8") as input_stream:
                     move = Move.from_tres(input_stream)
-                    self.__moves[relative_path] = move
+                    self.__moves[relative_path] = (root_name, move)
 
                     return move
 
@@ -179,7 +183,7 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         moves: Dict[str, Move] = {}
-        for root in self.__roots.values():
+        for root_name, root in self.__roots.items():
             moves_dir_path = root / relative_path
             if moves_dir_path.exists():
                 move_paths = sorted(moves_dir_path.glob("*.tres"))
@@ -192,14 +196,14 @@ class Hoylake:
                     if move_relative_path in self.__moves:
                         moves[f"res://{move_relative_path}"] = self.__moves[
                             move_relative_path
-                        ]
+                        ][1]
                         continue
 
                     with open(move_path, "r", encoding="utf-8") as input_stream:
                         move = Move.from_tres(input_stream)
 
                         moves[f"res://{move_relative_path}"] = move
-                        self.__moves[move_relative_path] = move
+                        self.__moves[move_relative_path] = (root_name, move)
 
         return moves
 
@@ -261,7 +265,7 @@ class Hoylake:
         """
         monster_forms = {}
         for tag in tags:
-            for path, monster_form in self.__monster_forms.items():
+            for path, (_, monster_form) in self.__monster_forms.items():
                 if tag in monster_form.move_tags:
                     monster_forms[f"res://{path}"] = monster_form
 
@@ -273,7 +277,7 @@ class Hoylake:
         """
         moves = {}
         for tag in tags:
-            for path, move in self.__moves.items():
+            for path, (_, move) in self.__moves.items():
                 if tag in move.tags:
                     moves[f"res://{path}"] = move
 
