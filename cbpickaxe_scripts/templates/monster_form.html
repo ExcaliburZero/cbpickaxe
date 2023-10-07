@@ -12,109 +12,110 @@
 
 <body>
   <div class="container">
-    <div class="row">
+    <div class="row justify-content-center" style="text-align: center;">
       <h1>{{ name }} (#{{ bestiary_index }})</h1>
       <p>"{{ description }}"</p>
     </div>
-    <div class="row">
-      <img src="../../Magikrab.png" class="img-fluid" alt="Sprite of {{ name }}"
-        style="image-rendering: pixelated; max-width: 200px; max-height: 200px;">
+    <div class="row justify-content-center">
+      <img src="../../Magikrab.png" alt="Sprite of {{ name }}"
+        style="image-rendering: pixelated; max-width: 200px; max-height: 200px; display: block; margin-left: auto; margin-right: auto;">
     </div>
-    <div class="row">
-      <div class="container" style="max-width: 250px;">
-        <div class="row">
-          <div class="col">
-            <p><b>Type</b></p>
-          </div>
-          <div class="col">
+    <div class="row justify-content-center">
+      <table class="table" style="max-width: 250px;">
+        <tr>
+          <th>
+            <p>Type</p>
+          </th>
+          <td>
             <p>{{ elemental_type }}</p>
-          </div>
-        </div>
-      </div>
+          </td>
+        </tr>
+      </table>
     </div>
     <div class="row">
       <h2>In-Game Bio</h2>
       <p>{{ bestiary_bio_1 }}</p>
       <p>{{ bestiary_bio_2 }}</p>
     </div>
-    <div class="row">
+    <div class="row justify-content-center">
       <h2>Stats</h2>
-      <div class="container" style="max-width: 250px;">
-        <div class="row">
-          <div class="col">
-            <p><b>Max HP</b></p>
-          </div>
-          <div class="col">
+      <table class="table" style="max-width: 250px;">
+        <tr>
+          <th>
+            <p>Max HP</p>
+          </th>
+          <td>
             <p>{{ max_hp }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <p><b>M. Atk</b></p>
-          </div>
-          <div class="col">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <p>M. Atk</p>
+          </th>
+          <td>
             <p>{{ melee_attack }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <p><b>M. Def</b></p>
-          </div>
-          <div class="col">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <p>M. Def</p>
+          </th>
+          <td>
             <p>{{ melee_defense }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <p><b>R. Atk</b></p>
-          </div>
-          <div class="col">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <p>R. Atk</p>
+          </th>
+          <td>
             <p>{{ ranged_attack }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <p><b>R. Def</b></p>
-          </div>
-          <div class="col">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <p>R. Def</p>
+          </th>
+          <td>
             <p>{{ ranged_defense }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <p><b>Speed</b></p>
-          </div>
-          <div class="col">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <p>Speed</p>
+          </th>
+          <td>
             <p>{{ speed }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <p><b>Total</b></p>
-          </div>
-          <div class="col">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <p>Total</p>
+          </th>
+          <td>
             <p>{{ stat_total }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <p><b>Max AP</b></p>
-          </div>
-          <div class="col">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <p>Max AP</p>
+          </th>
+          <td>
             <p>{{ max_ap }}</p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <p><b>Move Slots</b></p>
-          </div>
-          <div class="col">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <p>Move Slots</p>
+          </th>
+          <td>
             <p>{{ move_slots }}</p>
-          </div>
-        </div>
-      </div>
+          </td>
+        </tr>
+      </table>
     </div>
     <div class="row table-responsive">
+      <h2>Moves</h2>
       <table class="table" data-toggle="table">
         <thead>
           <tr>
