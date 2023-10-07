@@ -22,6 +22,7 @@ SOURCE_DIR = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = SOURCE_DIR / "templates"
 MONSTER_FORM_TEMPLATE = TEMPLATES_DIR / "monster_form.html.template"
 
+OFFICIAL_ROOT_NAME = "cassette_beasts"
 OFFICIAL_MONSTER_FORM_PATHS = [
     "res://data/monster_forms/",
     "res://data/monster_forms_secret/",
@@ -90,8 +91,8 @@ class Config:
         assert isinstance(monster_forms_entry, dict)
         assert isinstance(moves_entry, dict)
 
-        if "cassette_beasts" not in roots:
-            logging.error('roots must contain "cassette_beasts"')
+        if OFFICIAL_ROOT_NAME not in roots:
+            logging.error(f'roots must contain "{OFFICIAL_ROOT_NAME}"')
             raise ValueError()
 
         monster_forms = MonsterForms.from_dict(monster_forms_entry)
@@ -149,7 +150,10 @@ def main(argv: List[str]) -> int:
     monster_form_images_dir.mkdir()
 
     for monster_path, (root_name, monster_form) in monster_forms.items():
-        if not config.monster_forms.include_official and root_name == "cassette_beasts":
+        if (
+            not config.monster_forms.include_official
+            and root_name == OFFICIAL_ROOT_NAME
+        ):
             continue
 
         monster_page_filepath = monster_forms_dir / (
@@ -167,6 +171,14 @@ def main(argv: List[str]) -> int:
             )
 
     return SUCCESS
+
+
+def get_move_link(hoylake: cbp.Hoylake, root_name: str, move: cbp.Move) -> str:
+    if root_name == OFFICIAL_ROOT_NAME:
+        move_name = hoylake.translate(move.name)
+        return f"https://wiki.cassettebeasts.com/wiki/{move_name.replace(' ', '_')}"
+
+    raise NotImplementedError()
 
 
 def create_monster_form_page(
@@ -227,8 +239,9 @@ def create_monster_form_page(
                         "cost": "Passive"
                         if move.is_passive_only
                         else f"{move.cost} AP",
+                        "link": get_move_link(hoylake, move_root, move),
                     }
-                    for path, (_, move) in compatible_moves.items()
+                    for path, (move_root, move) in compatible_moves.items()
                 ],
                 key=lambda m: m["name"],
             ),

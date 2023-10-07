@@ -132,7 +132,7 @@
         <tbody>
           {% for move in compatible_moves %}
           <tr>
-            <td style="white-space: nowrap;">{{ move.name }}</td>
+            <td style="white-space: nowrap;"><a href="{{ move.link }}">{{ move.name }}</a></td>
             <td style="white-space: nowrap;">{{ move.type }}</td>
             <td style="white-space: nowrap;">{{ move.category }}</td>
             <td style="white-space: nowrap;">{{ move.power }}</td>
