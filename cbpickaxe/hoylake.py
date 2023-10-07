@@ -28,6 +28,8 @@ class Hoylake:
         self.__monster_forms: Dict[RelativeResPath, MonsterForm] = {}
         self.__moves: Dict[RelativeResPath, Move] = {}
 
+        self.__moves_to_ignore = ["res://data/battle_moves/placeholder.tres"]
+
     def load_root(self, new_root: pathlib.Path) -> None:
         """
         Adds the given root directory to the list of known root directories.
@@ -150,6 +152,9 @@ class Hoylake:
                 move_paths = sorted(moves_dir_path.glob("*.tres"))
                 for move_path in move_paths:
                     move_relative_path = relative_path / move_path.name
+
+                    if f"res://{move_relative_path}" in self.__moves_to_ignore:
+                        continue
 
                     if move_relative_path in self.__moves:
                         moves[f"res://{move_relative_path}"] = self.__moves[
