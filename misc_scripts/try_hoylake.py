@@ -22,8 +22,8 @@ def main(argv: List[str]) -> int:
     logging.getLogger().setLevel(logging.INFO)
 
     hoylake = cbp.Hoylake()
-    for root in args.roots:
-        hoylake.load_root(pathlib.Path(root))
+    for i, root in enumerate(args.roots):
+        hoylake.load_root(str(i), pathlib.Path(root))
 
     _ = hoylake.load_monster_forms("res://data/monster_forms/")
     _ = hoylake.load_monster_forms("res://data/monster_forms_secret/")

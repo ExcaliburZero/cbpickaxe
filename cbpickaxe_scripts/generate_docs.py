@@ -117,8 +117,8 @@ def main(argv: List[str]) -> int:
     config.output_directory.mkdir()
 
     hoylake = cbp.Hoylake()
-    for _, root in config.roots.items():
-        hoylake.load_root(pathlib.Path(root))
+    for name, root in config.roots.items():
+        hoylake.load_root(name, pathlib.Path(root))
 
     for monsters_path in OFFICIAL_MONSTER_FORM_PATHS + config.monster_forms.paths:
         if monsters_path.endswith(".tres"):

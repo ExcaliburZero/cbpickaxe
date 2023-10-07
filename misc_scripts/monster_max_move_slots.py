@@ -23,8 +23,8 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     hoylake = cbp.Hoylake()
-    for root in args.roots:
-        hoylake.load_root(pathlib.Path(root))
+    for i, root in enumerate(args.roots):
+        hoylake.load_root(str(i), pathlib.Path(root))
 
     monster_forms = {}
     for monster_forms_path in args.monster_form_paths:

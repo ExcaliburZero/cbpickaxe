@@ -22,7 +22,7 @@ class Hoylake:
     """
 
     def __init__(self) -> None:
-        self.__roots: List[pathlib.Path] = []
+        self.__roots: Dict[str, pathlib.Path] = {}
         self.__translation_tables: collections.defaultdict[
             str, List[TranslationTable]
         ] = collections.defaultdict(lambda: [])
@@ -33,7 +33,7 @@ class Hoylake:
 
         self.__moves_to_ignore = ["res://data/battle_moves/placeholder.tres"]
 
-    def load_root(self, new_root: pathlib.Path) -> None:
+    def load_root(self, name: str, new_root: pathlib.Path) -> None:
         """
         Adds the given root directory to the list of known root directories.
 
@@ -44,7 +44,10 @@ class Hoylake:
         """
         logging.info(f"Loading new root directory: {new_root}")
 
-        self.__roots.append(new_root)
+        if name in self.__roots:
+            raise ValueError(f"A root with name {name} has already been loaded.")
+
+        self.__roots[name] = new_root
         self.__load_translation_tables(new_root)
 
     def load_animation(self, path: str) -> Animation:
@@ -63,7 +66,7 @@ class Hoylake:
         if relative_path in self.__animations:
             return self.__animations[relative_path]
 
-        for root in self.__roots:
+        for root in self.__roots.values():
             animation_path = root / relative_path
             if animation_path.exists():
                 with open(animation_path, "r", encoding="utf-8") as input_stream:
@@ -90,7 +93,7 @@ class Hoylake:
         if relative_path in self.__monster_forms:
             return self.__monster_forms[relative_path]
 
-        for root in self.__roots:
+        for root in self.__roots.values():
             monster_path = root / relative_path
             if monster_path.exists():
                 with open(monster_path, "r", encoding="utf-8") as input_stream:
@@ -114,7 +117,7 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         monster_forms: Dict[str, MonsterForm] = {}
-        for root in self.__roots:
+        for root in self.__roots.values():
             monsters_dir_path = root / relative_path
             if monsters_dir_path.exists():
                 monster_paths = sorted(monsters_dir_path.glob("*.tres"))
@@ -152,7 +155,7 @@ class Hoylake:
         if relative_path in self.__moves:
             return self.__moves[relative_path]
 
-        for root in self.__roots:
+        for root in self.__roots.values():
             move_path = root / relative_path
             if move_path.exists():
                 with open(move_path, "r", encoding="utf-8") as input_stream:
@@ -176,7 +179,7 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         moves: Dict[str, Move] = {}
-        for root in self.__roots:
+        for root in self.__roots.values():
             moves_dir_path = root / relative_path
             if moves_dir_path.exists():
                 move_paths = sorted(moves_dir_path.glob("*.tres"))
@@ -211,7 +214,7 @@ class Hoylake:
 
         relative_path = Hoylake.__parse_res_path(path)
 
-        for root in self.__roots:
+        for root in self.__roots.values():
             filepath = root / relative_path
 
             if filepath.exists():
