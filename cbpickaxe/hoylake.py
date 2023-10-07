@@ -177,7 +177,7 @@ class Hoylake:
         Must have loaded at least one root before running.
 
         If the string is not found for the given locale in any of the translation tables in any of
-        the loaded root directories, then a KeyError will raised.
+        the loaded root directories, then the given string will be returned.
 
         If no translation tables have been loaded for the given locale, then a ValueError will be
         raised.
@@ -195,7 +195,7 @@ class Hoylake:
             except KeyError:
                 pass
 
-        raise KeyError(string)
+        return string
 
     def get_locales(self) -> Set[str]:
         """
