@@ -1,3 +1,4 @@
+# pylint: disable=missing-module-docstring,missing-function-docstring,missing-class-docstring
 from dataclasses import dataclass
 from typing import Any, cast, Dict, IO, List
 
@@ -116,7 +117,7 @@ def main(argv: List[str]) -> int:
     config.output_directory.mkdir()
 
     hoylake = cbp.Hoylake()
-    for name, root in config.roots.items():
+    for _, root in config.roots.items():
         hoylake.load_root(pathlib.Path(root))
 
     for monsters_path in OFFICIAL_MONSTER_FORM_PATHS + config.monster_forms.paths:

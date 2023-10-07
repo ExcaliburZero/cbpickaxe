@@ -1,10 +1,9 @@
+# pylint: disable=missing-module-docstring,missing-function-docstring,missing-class-docstring
 from typing import Dict, List
 
 import argparse
 import csv
-import json
 import pathlib
-import re
 import sys
 
 import cbpickaxe as cbp
@@ -24,7 +23,7 @@ def main(argv: List[str]) -> int:
 
     strings_to_translate = []
     for filepath in args.strings_text_files:
-        with open(filepath, "r") as input_stream:
+        with open(filepath, "r", encoding="utf-8") as input_stream:
             for line in input_stream:
                 line = line.strip()
                 if line == "":
@@ -44,7 +43,7 @@ def main(argv: List[str]) -> int:
         for translation_filepath in args.translation_files
     }
 
-    with open(args.output_file, "w") as ouput_stream:
+    with open(args.output_file, "w", encoding="utf-8") as ouput_stream:
         writer = csv.DictWriter(
             ouput_stream, fieldnames=["id", *sorted(set(locales.values()))]
         )
