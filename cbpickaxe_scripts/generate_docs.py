@@ -51,7 +51,10 @@ def main(argv: List[str]) -> int:
         hoylake.load_root(pathlib.Path(root))
 
     for monsters_path in args.monster_form_paths:
-        monster_forms = hoylake.load_monster_forms(monsters_path)
+        if monsters_path.endswith(".tres"):
+            monster_forms = {monsters_path: hoylake.load_monster_form(monsters_path)}
+        else:
+            monster_forms = hoylake.load_monster_forms(monsters_path)
 
     for moves_path in args.move_paths:
         _ = hoylake.load_moves(moves_path)
