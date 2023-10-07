@@ -32,17 +32,21 @@ OFFICIAL_MOVE_PATHS = ["res://data/battle_moves/"]
 @dataclass
 class MonsterForms:
     paths: List[str]
+    include_official: bool
 
     @staticmethod
     def from_dict(d: Dict[Any, Any]) -> "MonsterForms":
         paths = d.get("paths", [])
+        include_official = d.get("include_official", False)
+
+        assert isinstance(include_official, bool)
 
         assert isinstance(paths, list)
         for p in paths:
             assert isinstance(p, str)
         paths = cast(List[str], paths)
 
-        return MonsterForms(paths)
+        return MonsterForms(paths=paths, include_official=include_official)
 
 
 @dataclass
@@ -128,11 +132,12 @@ def main(argv: List[str]) -> int:
     for name, root in config.roots.items():
         hoylake.load_root(name, pathlib.Path(root))
 
+    monster_forms = {}
     for monsters_path in OFFICIAL_MONSTER_FORM_PATHS + config.monster_forms.paths:
         if monsters_path.endswith(".tres"):
-            monster_forms = {monsters_path: hoylake.load_monster_form(monsters_path)}
+            monster_forms[monsters_path] = hoylake.load_monster_form(monsters_path)
         else:
-            monster_forms = hoylake.load_monster_forms(monsters_path)
+            monster_forms.update(hoylake.load_monster_forms(monsters_path))
 
     for moves_path in OFFICIAL_MOVE_PATHS + config.moves.paths:
         _ = hoylake.load_moves(moves_path)
@@ -143,20 +148,23 @@ def main(argv: List[str]) -> int:
     monster_form_images_dir = monster_forms_dir / "sprites"
     monster_form_images_dir.mkdir()
 
-    monster_path, (_, monster_form) = sorted(monster_forms.items())[0]
-    monster_page_filepath = monster_forms_dir / (
-        hoylake.translate(monster_form.name) + ".html"
-    )
-    with open(monster_page_filepath, "w", encoding="utf-8") as output_stream:
-        create_monster_form_page(
-            monster_path,
-            monster_form,
-            hoylake,
-            monster_form_template,
-            monster_forms_dir,
-            monster_form_images_dir,
-            output_stream,
+    for monster_path, (root_name, monster_form) in monster_forms.items():
+        if not config.monster_forms.include_official and root_name == "cassette_beasts":
+            continue
+
+        monster_page_filepath = monster_forms_dir / (
+            hoylake.translate(monster_form.name) + ".html"
         )
+        with open(monster_page_filepath, "w", encoding="utf-8") as output_stream:
+            create_monster_form_page(
+                monster_path,
+                monster_form,
+                hoylake,
+                monster_form_template,
+                monster_forms_dir,
+                monster_form_images_dir,
+                output_stream,
+            )
 
     return SUCCESS
 
