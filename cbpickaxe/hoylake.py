@@ -4,9 +4,11 @@ Code for loading in data files and querying data from them.
 from typing import Dict, List, Iterable, Set
 
 import collections
+import json
 import logging
 import pathlib
 
+from .animation import Animation
 from .monster_form import MonsterForm
 from .move import Move
 from .translation_table import TranslationTable
@@ -27,6 +29,7 @@ class Hoylake:
 
         self.__monster_forms: Dict[RelativeResPath, MonsterForm] = {}
         self.__moves: Dict[RelativeResPath, Move] = {}
+        self.__animations: Dict[RelativeResPath, Animation] = {}
 
         self.__moves_to_ignore = ["res://data/battle_moves/placeholder.tres"]
 
@@ -43,6 +46,33 @@ class Hoylake:
 
         self.__roots.append(new_root)
         self.__load_translation_tables(new_root)
+
+    def load_animation(self, path: str) -> Animation:
+        """
+        Loads in the animation at the given res:// filepath.
+
+        Must have loaded at least one root before running.
+
+        If there is no animation file at that location in any of the loaded root directories,
+        then a ValueError will be raised.
+        """
+        self.__check_if_root_loaded()
+
+        relative_path = Hoylake.__parse_res_path(path)
+
+        if relative_path in self.__animations:
+            return self.__animations[relative_path]
+
+        for root in self.__roots:
+            animation_path = root / relative_path
+            if animation_path.exists():
+                with open(animation_path, "r", encoding="utf-8") as input_stream:
+                    animation = Animation.from_dict(json.load(input_stream))
+                    self.__animations[relative_path] = animation
+
+                    return animation
+
+        raise ValueError(f"Could not find animation file at path: {path}")
 
     def load_monster_form(self, path: str) -> MonsterForm:
         """

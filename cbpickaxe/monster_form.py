@@ -65,6 +65,7 @@ class MonsterForm:
     evolutions: List[Evolution]
     bestiary_index: int
     move_tags: List[str]
+    battle_sprite_path: str
     tape_upgrades: List[Union[TapeUpgrade, str]]
     bestiary_bios: List[str]
 
@@ -108,6 +109,7 @@ class MonsterForm:
         max_ap = None
         evolutions = None
         move_tags = None
+        battle_sprite_path = None
         tape_upgrades: Optional[List[Union[TapeUpgrade, str]]] = None
         bestiary_bios = None
 
@@ -131,6 +133,7 @@ class MonsterForm:
                 evasion = section["evasion"]
                 max_ap = section["max_ap"]
                 move_tags = section["move_tags"]
+                battle_sprite_path = section["battle_sprite_path"]
                 bestiary_bios = section["bestiary_bios"]
 
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
@@ -153,6 +156,7 @@ class MonsterForm:
         assert isinstance(accuracy, int)
         assert isinstance(evasion, int)
         assert isinstance(max_ap, int)
+        assert isinstance(battle_sprite_path, str)
         assert isinstance(move_tags, list)
         assert isinstance(bestiary_bios, list)
         assert tape_upgrades is not None
@@ -186,6 +190,7 @@ class MonsterForm:
             evolutions=evolutions,
             bestiary_index=bestiary_index,
             move_tags=move_tags,
+            battle_sprite_path=battle_sprite_path,
             tape_upgrades=tape_upgrades,
             bestiary_bios=bestiary_bios,
         )
