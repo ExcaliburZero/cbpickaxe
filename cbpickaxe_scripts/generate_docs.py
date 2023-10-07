@@ -1,4 +1,5 @@
-from typing import IO, List
+from dataclasses import dataclass
+from typing import Any, cast, Dict, IO, List
 
 import argparse
 import logging
@@ -6,6 +7,7 @@ import os
 import pathlib
 import shutil
 import sys
+import tomllib
 
 import jinja2 as j2
 import PIL.Image
@@ -19,53 +21,114 @@ SOURCE_DIR = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = SOURCE_DIR / "templates"
 MONSTER_FORM_TEMPLATE = TEMPLATES_DIR / "monster_form.html.template"
 
+OFFICIAL_MONSTER_FORM_PATHS = [
+    "res://data/monster_forms/",
+    "res://data/monster_forms_secret/",
+]
+OFFICIAL_MOVE_PATHS = ["res://data/battle_moves/"]
+
+
+@dataclass
+class MonsterForms:
+    paths: List[str]
+
+    @staticmethod
+    def from_dict(d: Dict[Any, Any]) -> "MonsterForms":
+        paths = d.get("paths", [])
+
+        assert isinstance(paths, list)
+        for p in paths:
+            assert isinstance(p, str)
+        paths = cast(List[str], paths)
+
+        return MonsterForms(paths)
+
+
+@dataclass
+class Moves:
+    paths: List[str]
+
+    @staticmethod
+    def from_dict(d: Dict[Any, Any]) -> "Moves":
+        paths = d.get("paths", [])
+
+        assert isinstance(paths, list)
+        for p in paths:
+            assert isinstance(p, str)
+        paths = cast(List[str], paths)
+
+        return Moves(paths)
+
+
+@dataclass
+class Config:
+    output_directory: pathlib.Path
+    roots: Dict[str, pathlib.Path]
+    monster_forms: MonsterForms
+    moves: Moves
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> "Config":
+        output_directory = d.get("output_directory", "docs")
+        roots = d["roots"]
+        monster_forms_entry = d.get("monster_forms", {})
+        moves_entry = d.get("moves", {})
+
+        assert isinstance(output_directory, str)
+
+        assert isinstance(roots, dict)
+        for key, value in roots.items():
+            assert isinstance(key, str)
+            assert isinstance(value, str)
+        roots = cast(Dict[str, str], roots)
+
+        assert isinstance(monster_forms_entry, dict)
+        assert isinstance(moves_entry, dict)
+
+        monster_forms = MonsterForms.from_dict(monster_forms_entry)
+        moves = Moves.from_dict(moves_entry)
+
+        return Config(
+            output_directory=pathlib.Path(output_directory),
+            roots={key: pathlib.Path(value) for key, value in roots.items()},
+            monster_forms=monster_forms,
+            moves=moves,
+        )
+
 
 def main(argv: List[str]) -> int:
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--roots", nargs="+", required=True)
-    parser.add_argument(
-        "--move_paths",
-        nargs="+",
-        default=["res://data/battle_moves/"],
-    )
-    parser.add_argument(
-        "--monster_form_paths",
-        nargs="+",
-        default=[
-            "res://data/monster_forms/",
-            "res://data/monster_forms_secret/",
-            "res://mods/de_example_monster/traffikrabdos.tres",
-        ],
-    )
-    parser.add_argument("--output_directory", default="docs")
+    parser.add_argument("--config", nargs="+", default="docs.toml")
 
     args = parser.parse_args(argv)
+
+    with open(args.config, "rb") as input_stream:
+        config = Config.from_dict(tomllib.load(input_stream))
 
     env = j2.Environment(
         loader=j2.PackageLoader("cbpickaxe_scripts"), autoescape=j2.select_autoescape()
     )
     monster_form_template = env.get_template("monster_form.html")
 
-    output_directory = pathlib.Path(args.output_directory)
-    if output_directory.exists():
-        shutil.rmtree(output_directory)
-    output_directory.mkdir()
+    if config.output_directory.exists():
+        shutil.rmtree(config.output_directory)
+    config.output_directory.mkdir()
 
     hoylake = cbp.Hoylake()
-    for root in args.roots:
+    for name, root in config.roots.items():
         hoylake.load_root(pathlib.Path(root))
 
-    for monsters_path in args.monster_form_paths:
+    for monsters_path in OFFICIAL_MONSTER_FORM_PATHS + config.monster_forms.paths:
         if monsters_path.endswith(".tres"):
             monster_forms = {monsters_path: hoylake.load_monster_form(monsters_path)}
         else:
             monster_forms = hoylake.load_monster_forms(monsters_path)
 
-    for moves_path in args.move_paths:
+    for moves_path in OFFICIAL_MOVE_PATHS + config.moves.paths:
         _ = hoylake.load_moves(moves_path)
 
-    monster_forms_dir = output_directory / "monsters"
+    monster_forms_dir = config.output_directory / "monsters"
     monster_forms_dir.mkdir()
 
     monster_form_images_dir = monster_forms_dir / "sprites"
