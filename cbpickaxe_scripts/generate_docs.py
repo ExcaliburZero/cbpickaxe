@@ -108,7 +108,7 @@ def create_monster_form_page(
                         "name": hoylake.translate(move.name),
                         "type": move.elemental_types[0].capitalize()
                         if len(move.elemental_types) > 0
-                        else "None",
+                        else "Typeless",
                         "category": hoylake.translate(move.category_name),
                         "power": move.power if move.power > 0 else "—",
                         "accuracy": "Unavoidable"
