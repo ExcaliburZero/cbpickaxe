@@ -39,13 +39,13 @@ def main(argv: List[str]) -> int:
             users = [
                 hoylake.translate(monster_form.name)
                 for _, monster_form in sorted(
-                    hoylake.get_monster_forms_by_tags(move.tags).items(),
+                    hoylake.get_monster_forms_by_tags(move[1].tags).items(),
                     key=lambda d: (d[1].bestiary_index, hoylake.translate(d[1].name)),
                 )
             ]
             writer.writerow(
                 {
-                    "move": hoylake.translate(move.name),
+                    "move": hoylake.translate(move[1].name),
                     "users": ", ".join(users),
                 }
             )

@@ -33,10 +33,10 @@ def main(argv: List[str]) -> int:
     print("{{#switch: {{{1|}}}")
     for _, monster_form in sorted(
         monster_forms.items(),
-        key=lambda d: (d[1].bestiary_index, hoylake.translate(d[1].name)),
+        key=lambda d: (d[1][1].bestiary_index, hoylake.translate(d[1][1].name)),
     ):
         print(
-            f"| {hoylake.translate(monster_form.name)} = {monster_form.max_move_slots}"
+            f"| {hoylake.translate(monster_form[1].name)} = {monster_form[1].max_move_slots}"
         )
     print("| #default = Unknown")
     print("}}")

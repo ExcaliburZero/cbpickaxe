@@ -78,7 +78,7 @@ class Hoylake:
 
         raise ValueError(f"Could not find animation file at path: {path}")
 
-    def load_monster_form(self, path: str) -> MonsterForm:
+    def load_monster_form(self, path: str) -> Tuple[RootName, MonsterForm]:
         """
         Loads in the monster form at the given res:// filepath.
 
@@ -92,7 +92,7 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         if relative_path in self.__monster_forms:
-            return self.__monster_forms[relative_path][1]
+            return self.__monster_forms[relative_path]
 
         for root_name, root in self.__roots.items():
             monster_path = root / relative_path
@@ -101,11 +101,11 @@ class Hoylake:
                     monster_form = MonsterForm.from_tres(input_stream)
                     self.__monster_forms[relative_path] = (root_name, monster_form)
 
-                    return monster_form
+                    return (root_name, monster_form)
 
         raise ValueError(f"Could not find monster file at path: {path}")
 
-    def load_monster_forms(self, path: str) -> Dict[str, MonsterForm]:
+    def load_monster_forms(self, path: str) -> Dict[str, Tuple[RootName, MonsterForm]]:
         """
         Loads in all of the monster forms within the given res:// directory path.
 
@@ -117,7 +117,7 @@ class Hoylake:
 
         relative_path = Hoylake.__parse_res_path(path)
 
-        monster_forms: Dict[str, MonsterForm] = {}
+        monster_forms: Dict[str, Tuple[RootName, MonsterForm]] = {}
         for root_name, root in self.__roots.items():
             monsters_dir_path = root / relative_path
             if monsters_dir_path.exists():
@@ -128,14 +128,17 @@ class Hoylake:
                     if monster_relative_path in self.__monster_forms:
                         monster_forms[
                             f"res://{monster_relative_path}"
-                        ] = self.__monster_forms[monster_relative_path][1]
+                        ] = self.__monster_forms[monster_relative_path]
                         continue
 
                     with open(monster_path, "r", encoding="utf-8") as input_stream:
                         monster_form = MonsterForm.from_tres(input_stream)
 
                         monster_relative_path = relative_path / monster_path.name
-                        monster_forms[f"res://{monster_relative_path}"] = monster_form
+                        monster_forms[f"res://{monster_relative_path}"] = (
+                            root_name,
+                            monster_form,
+                        )
                         self.__monster_forms[monster_relative_path] = (
                             root_name,
                             monster_form,
@@ -143,7 +146,7 @@ class Hoylake:
 
         return monster_forms
 
-    def load_move(self, path: str) -> Move:
+    def load_move(self, path: str) -> Tuple[RootName, Move]:
         """
         Loads in the move at the given res:// filepath.
 
@@ -157,7 +160,7 @@ class Hoylake:
         relative_path = Hoylake.__parse_res_path(path)
 
         if relative_path in self.__moves:
-            return self.__moves[relative_path][1]
+            return self.__moves[relative_path]
 
         for root_name, root in self.__roots.items():
             move_path = root / relative_path
@@ -166,11 +169,11 @@ class Hoylake:
                     move = Move.from_tres(input_stream)
                     self.__moves[relative_path] = (root_name, move)
 
-                    return move
+                    return (root_name, move)
 
         raise ValueError(f"Could not find monster file at path: {path}")
 
-    def load_moves(self, path: str) -> Dict[str, Move]:
+    def load_moves(self, path: str) -> Dict[str, Tuple[RootName, Move]]:
         """
         Loads in all of the moves within the given res:// directory path.
 
@@ -182,7 +185,7 @@ class Hoylake:
 
         relative_path = Hoylake.__parse_res_path(path)
 
-        moves: Dict[str, Move] = {}
+        moves: Dict[str, Tuple[RootName, Move]] = {}
         for root_name, root in self.__roots.items():
             moves_dir_path = root / relative_path
             if moves_dir_path.exists():
@@ -196,13 +199,13 @@ class Hoylake:
                     if move_relative_path in self.__moves:
                         moves[f"res://{move_relative_path}"] = self.__moves[
                             move_relative_path
-                        ][1]
+                        ]
                         continue
 
                     with open(move_path, "r", encoding="utf-8") as input_stream:
                         move = Move.from_tres(input_stream)
 
-                        moves[f"res://{move_relative_path}"] = move
+                        moves[f"res://{move_relative_path}"] = (root_name, move)
                         self.__moves[move_relative_path] = (root_name, move)
 
         return moves

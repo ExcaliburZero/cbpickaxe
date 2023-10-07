@@ -143,7 +143,7 @@ def main(argv: List[str]) -> int:
     monster_form_images_dir = monster_forms_dir / "sprites"
     monster_form_images_dir.mkdir()
 
-    monster_path, monster_form = sorted(monster_forms.items())[0]
+    monster_path, (_, monster_form) = sorted(monster_forms.items())[0]
     monster_page_filepath = monster_forms_dir / (
         hoylake.translate(monster_form.name) + ".html"
     )
