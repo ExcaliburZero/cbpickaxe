@@ -208,9 +208,15 @@ def create_monster_form_page(
             if monster_sprite_filepath is None
             else monster_sprite_filepath,
             description=hoylake.translate(monster_form.description),
-            elemental_type=monster_form.elemental_types[0].capitalize(),
-            bestiary_bio_1=hoylake.translate(monster_form.bestiary_bios[0]),
-            bestiary_bio_2=hoylake.translate(monster_form.bestiary_bios[1]),
+            elemental_type=monster_form.elemental_types[0].capitalize()
+            if len(monster_form.elemental_types) > 0
+            else "Typeless",
+            bestiary_bio_1=hoylake.translate(monster_form.bestiary_bios[0])
+            if len(monster_form.bestiary_bios) > 0
+            else "",
+            bestiary_bio_2=hoylake.translate(monster_form.bestiary_bios[1])
+            if len(monster_form.bestiary_bios) > 1
+            else "",
             max_hp=monster_form.max_hp,
             melee_attack=monster_form.melee_attack,
             melee_defense=monster_form.melee_defense,
