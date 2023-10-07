@@ -29,7 +29,7 @@ def main(argv: List[str]) -> int:
     _ = hoylake.load_monster_forms("res://data/monster_forms_secret/")
 
     move = hoylake.load_move("res://data/battle_moves/carnivore.tres")[1]
-    for path, monster_form in hoylake.get_monster_forms_by_tags(move.tags).items():
+    for path, (_, monster_form) in hoylake.get_monster_forms_by_tags(move.tags).items():
         print(path, monster_form)
 
     print("==========================")
@@ -41,7 +41,7 @@ def main(argv: List[str]) -> int:
     monster_form = hoylake.load_monster_form(
         "res://data/monster_forms/shining_kuneko.tres"
     )[1]
-    for path, move in hoylake.get_moves_by_tags(monster_form.move_tags).items():
+    for path, (_, move) in hoylake.get_moves_by_tags(monster_form.move_tags).items():
         print(path, move)
 
     print(len(hoylake.get_moves_by_tags(monster_form.move_tags + ["any"])))

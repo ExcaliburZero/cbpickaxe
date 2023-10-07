@@ -220,7 +220,7 @@ def create_monster_form_page(
                         if move.is_passive_only
                         else f"{move.cost} AP",
                     }
-                    for path, move in compatible_moves.items()
+                    for path, (_, move) in compatible_moves.items()
                 ],
                 key=lambda m: m["name"],
             ),

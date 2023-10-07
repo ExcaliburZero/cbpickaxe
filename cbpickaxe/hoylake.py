@@ -262,27 +262,31 @@ class Hoylake:
         """
         return set(self.__translation_tables.keys())
 
-    def get_monster_forms_by_tags(self, tags: Iterable[str]) -> Dict[str, MonsterForm]:
+    def get_monster_forms_by_tags(
+        self, tags: Iterable[str]
+    ) -> Dict[str, Tuple[RootName, MonsterForm]]:
         """
         Returns all of the monster forms that have any of the given tags.
         """
         monster_forms = {}
         for tag in tags:
-            for path, (_, monster_form) in self.__monster_forms.items():
+            for path, (root_name, monster_form) in self.__monster_forms.items():
                 if tag in monster_form.move_tags:
-                    monster_forms[f"res://{path}"] = monster_form
+                    monster_forms[f"res://{path}"] = (root_name, monster_form)
 
         return monster_forms
 
-    def get_moves_by_tags(self, tags: Iterable[str]) -> Dict[str, Move]:
+    def get_moves_by_tags(
+        self, tags: Iterable[str]
+    ) -> Dict[str, Tuple[RootName, Move]]:
         """
         Returns all of the moves that have any of the given tags.
         """
         moves = {}
         for tag in tags:
-            for path, (_, move) in self.__moves.items():
+            for path, (root_name, move) in self.__moves.items():
                 if tag in move.tags:
-                    moves[f"res://{path}"] = move
+                    moves[f"res://{path}"] = (root_name, move)
 
         return moves
 

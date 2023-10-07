@@ -38,9 +38,12 @@ def main(argv: List[str]) -> int:
         for _, move in hoylake.load_moves(moves_path).items():
             users = [
                 hoylake.translate(monster_form.name)
-                for _, monster_form in sorted(
+                for _, (_, monster_form) in sorted(
                     hoylake.get_monster_forms_by_tags(move[1].tags).items(),
-                    key=lambda d: (d[1].bestiary_index, hoylake.translate(d[1].name)),
+                    key=lambda d: (
+                        d[1][1].bestiary_index,
+                        hoylake.translate(d[1][1].name),
+                    ),
                 )
             ]
             writer.writerow(
