@@ -74,6 +74,24 @@ def create_monster_form_page(
         template.render(
             name=hoylake.translate(monster_form.name),
             bestiary_index=f"{monster_form.bestiary_index:03}",
+            description=hoylake.translate(monster_form.description),
+            elemental_type=monster_form.elemental_types[0],
+            bestiary_bio_1=hoylake.translate(monster_form.bestiary_bios[0]),
+            bestiary_bio_2=hoylake.translate(monster_form.bestiary_bios[1]),
+            max_hp=monster_form.max_hp,
+            melee_attack=monster_form.melee_attack,
+            melee_defense=monster_form.melee_defense,
+            ranged_attack=monster_form.ranged_attack,
+            ranged_defense=monster_form.ranged_defense,
+            speed=monster_form.speed,
+            stat_total=monster_form.max_hp
+            + monster_form.melee_attack
+            + monster_form.melee_defense
+            + monster_form.ranged_attack
+            + monster_form.ranged_defense
+            + monster_form.speed,
+            max_ap=monster_form.max_ap,
+            move_slots=f"{monster_form.move_slots} - {monster_form.max_move_slots}",
         )
     )
 
