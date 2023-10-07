@@ -66,6 +66,7 @@ class MonsterForm:
     bestiary_index: int
     move_tags: List[str]
     tape_upgrades: List[Union[TapeUpgrade, str]]
+    bestiary_bios: List[str]
 
     @property
     def max_move_slots(self) -> int:
@@ -108,6 +109,7 @@ class MonsterForm:
         evolutions = None
         move_tags = None
         tape_upgrades: Optional[List[Union[TapeUpgrade, str]]] = None
+        bestiary_bios = None
 
         for section in scene.get_sections():
             # pylint: disable-next=unidiomatic-typecheck
@@ -129,6 +131,7 @@ class MonsterForm:
                 evasion = section["evasion"]
                 max_ap = section["max_ap"]
                 move_tags = section["move_tags"]
+                bestiary_bios = section["bestiary_bios"]
 
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
                 elemental_types = MonsterForm.__parse_elemental_types(scene, section)
@@ -151,12 +154,17 @@ class MonsterForm:
         assert isinstance(evasion, int)
         assert isinstance(max_ap, int)
         assert isinstance(move_tags, list)
+        assert isinstance(bestiary_bios, list)
         assert tape_upgrades is not None
         assert evolutions is not None
 
         for tag in move_tags:
             assert isinstance(tag, str)
         move_tags = cast(List[str], move_tags)
+
+        for bio in bestiary_bios:
+            assert isinstance(bio, str)
+        bestiary_bios = cast(List[str], bestiary_bios)
 
         return MonsterForm(
             name=name,
@@ -179,6 +187,7 @@ class MonsterForm:
             bestiary_index=bestiary_index,
             move_tags=move_tags,
             tape_upgrades=tape_upgrades,
+            bestiary_bios=bestiary_bios,
         )
 
     @staticmethod
