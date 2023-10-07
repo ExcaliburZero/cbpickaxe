@@ -78,7 +78,7 @@ def create_monster_form_page(
     template: j2.Template,
     output_stream: IO[str],
 ) -> None:
-    compatible_moves = hoylake.get_moves_by_tags(monster_form.move_tags + ["all"])
+    compatible_moves = hoylake.get_moves_by_tags(monster_form.move_tags + ["any"])
 
     output_stream.write(
         template.render(
