@@ -106,7 +106,7 @@ def create_monster_form_page(
     output_stream.write(
         template.render(
             name=hoylake.translate(monster_form.name),
-            bestiary_index=f"{monster_form.bestiary_index:03}",
+            bestiary_index=f"{'-' if monster_form.bestiary_index < 0 else ''}{abs(monster_form.bestiary_index):03d}",
             monster_sprite_path=monster_sprite_filepath,
             description=hoylake.translate(monster_form.description),
             elemental_type=monster_form.elemental_types[0].capitalize(),
