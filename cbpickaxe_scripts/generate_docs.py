@@ -1,6 +1,7 @@
 from typing import IO, List
 
 import argparse
+import logging
 import os
 import pathlib
 import shutil
@@ -99,15 +100,20 @@ def create_monster_form_page(
 ) -> None:
     compatible_moves = hoylake.get_moves_by_tags(monster_form.move_tags + ["any"])
 
-    monster_sprite_filepath = get_idle_frame(
-        monster_form, hoylake, images_dir
-    ).relative_to(dest_dir)
+    try:
+        monster_sprite_filepath = get_idle_frame(
+            monster_form, hoylake, images_dir
+        ).relative_to(dest_dir)
+    except ValueError:
+        monster_sprite_filepath = None
 
     output_stream.write(
         template.render(
             name=hoylake.translate(monster_form.name),
             bestiary_index=f"{'-' if monster_form.bestiary_index < 0 else ''}{abs(monster_form.bestiary_index):03d}",
-            monster_sprite_path=monster_sprite_filepath,
+            monster_sprite_path=""
+            if monster_sprite_filepath is None
+            else monster_sprite_filepath,
             description=hoylake.translate(monster_form.description),
             elemental_type=monster_form.elemental_types[0].capitalize(),
             bestiary_bio_1=hoylake.translate(monster_form.bestiary_bios[0]),
@@ -155,7 +161,14 @@ def get_idle_frame(
     hoylake: cbp.Hoylake,
     images_dir: pathlib.Path,
 ) -> pathlib.Path:
-    animation = hoylake.load_animation(monster_form.battle_sprite_path)
+    try:
+        animation = hoylake.load_animation(monster_form.battle_sprite_path)
+    except ValueError:
+        logging.warning(
+            f"Could not find animation JSON file at path: {monster_form.battle_sprite_path}"
+        )
+        raise
+
     frame_box = animation.get_frame("idle", 0).box
 
     image_filepath_relative = (

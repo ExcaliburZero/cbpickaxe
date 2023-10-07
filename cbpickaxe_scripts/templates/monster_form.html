@@ -16,10 +16,12 @@
       <h1>{{ name }} (#{{ bestiary_index }})</h1>
       <p>"{{ description }}"</p>
     </div>
+    {% if monster_sprite_path != "" %}
     <div class="row justify-content-center">
       <img src="{{ monster_sprite_path }}" alt="Sprite of {{ name }}"
         style="image-rendering: pixelated; max-width: 200px; max-height: 200px; display: block; margin-left: auto; margin-right: auto;">
     </div>
+    {% endif %}
     <div class="row justify-content-center">
       <table class="table" style="max-width: 250px;">
         <tr>
