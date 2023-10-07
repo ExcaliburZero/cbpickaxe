@@ -7,6 +7,7 @@ import shutil
 import sys
 
 import jinja2 as j2
+import PIL.Image
 
 import cbpickaxe as cbp
 
@@ -30,7 +31,11 @@ def main(argv: List[str]) -> int:
     parser.add_argument(
         "--monster_form_paths",
         nargs="+",
-        default=["res://data/monster_forms/", "res://data/monster_forms_secret/"],
+        default=[
+            "res://data/monster_forms/",
+            "res://data/monster_forms_secret/",
+            "res://mods/de_example_monster/traffikrabdos.tres",
+        ],
     )
     parser.add_argument("--output_directory", default="docs")
 
@@ -62,13 +67,22 @@ def main(argv: List[str]) -> int:
     monster_forms_dir = output_directory / "monsters"
     monster_forms_dir.mkdir()
 
+    monster_form_images_dir = monster_forms_dir / "sprites"
+    monster_form_images_dir.mkdir()
+
     monster_path, monster_form = sorted(monster_forms.items())[0]
     monster_page_filepath = monster_forms_dir / (
         hoylake.translate(monster_form.name) + ".html"
     )
     with open(monster_page_filepath, "w", encoding="utf-8") as output_stream:
         create_monster_form_page(
-            monster_path, monster_form, hoylake, monster_form_template, output_stream
+            monster_path,
+            monster_form,
+            hoylake,
+            monster_form_template,
+            monster_forms_dir,
+            monster_form_images_dir,
+            output_stream,
         )
 
     return SUCCESS
@@ -79,14 +93,21 @@ def create_monster_form_page(
     monster_form: cbp.MonsterForm,
     hoylake: cbp.Hoylake,
     template: j2.Template,
+    dest_dir: pathlib.Path,
+    images_dir: pathlib.Path,
     output_stream: IO[str],
 ) -> None:
     compatible_moves = hoylake.get_moves_by_tags(monster_form.move_tags + ["any"])
+
+    monster_sprite_filepath = get_idle_frame(
+        monster_form, hoylake, images_dir
+    ).relative_to(dest_dir)
 
     output_stream.write(
         template.render(
             name=hoylake.translate(monster_form.name),
             bestiary_index=f"{monster_form.bestiary_index:03}",
+            monster_sprite_path=monster_sprite_filepath,
             description=hoylake.translate(monster_form.description),
             elemental_type=monster_form.elemental_types[0].capitalize(),
             bestiary_bio_1=hoylake.translate(monster_form.bestiary_bios[0]),
@@ -127,6 +148,37 @@ def create_monster_form_page(
             ),
         )
     )
+
+
+def get_idle_frame(
+    monster_form: cbp.MonsterForm,
+    hoylake: cbp.Hoylake,
+    images_dir: pathlib.Path,
+) -> pathlib.Path:
+    animation = hoylake.load_animation(monster_form.battle_sprite_path)
+    frame_box = animation.get_frame("idle", 0).box
+
+    image_filepath_relative = (
+        "/".join(monster_form.battle_sprite_path.split("/")[:-1])
+        + "/"
+        + animation.image
+    )
+
+    image_filepath = hoylake.lookup_filepath(image_filepath_relative)
+    source_image = PIL.Image.open(image_filepath)
+
+    box = (
+        frame_box.x,
+        frame_box.y,
+        frame_box.x + frame_box.width,
+        frame_box.y + frame_box.height,
+    )
+    cropped_image = source_image.crop(box)
+
+    output_filepath = images_dir / (hoylake.translate(monster_form.name) + ".png")
+    cropped_image.save(output_filepath)
+
+    return output_filepath
 
 
 def main_without_args() -> int:

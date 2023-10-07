@@ -200,6 +200,25 @@ class Hoylake:
 
         return moves
 
+    def lookup_filepath(self, path: str) -> pathlib.Path:
+        """
+        Returns a real filesystem path to the file at the given res:// path.
+
+        If there is no file at that location in any of the loaded root directories, then a
+        ValueError will be raised.
+        """
+        self.__check_if_root_loaded()
+
+        relative_path = Hoylake.__parse_res_path(path)
+
+        for root in self.__roots:
+            filepath = root / relative_path
+
+            if filepath.exists():
+                return filepath
+
+        raise ValueError(f"Could not find file at path: {path}")
+
     def translate(self, string: str, locale: str = "en") -> str:
         """
         Translates the given string to the specified locale. Locale defaults to English (en).
