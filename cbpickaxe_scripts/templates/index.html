@@ -16,6 +16,7 @@
     <div class="row justify-content-center" style="text-align: center;">
       <h2>{{ root.name }}</h2>
     </div>
+    {% if root.monsters|length > 0 %}
     <div class="row table-responsive">
       <h3>Monsters</h3>
       <table class="table" data-toggle="table">
@@ -37,6 +38,8 @@
         </tbody>
       </table>
     </div>
+    {% endif %}
+    {% if root.moves|length > 0 %}
     <div class="row table-responsive">
       <h3>Moves</h3>
       <table class="table" data-toggle="table">
@@ -64,6 +67,7 @@
         </tbody>
       </table>
     </div>
+    {% endif %}
     {% endfor %}
   </div>
 
