@@ -266,7 +266,7 @@ class Hoylake:
         return set(self.__translation_tables.keys())
 
     def get_monster_forms_by_tags(
-        self, tags: Iterable[str]
+        self, tags: Iterable[str], include_any: bool = True
     ) -> Dict[str, Tuple[RootName, MonsterForm]]:
         """
         Returns all of the monster forms that have any of the given tags.
@@ -274,7 +274,7 @@ class Hoylake:
         monster_forms = {}
         for tag in tags:
             for path, (root_name, monster_form) in self.__monster_forms.items():
-                if tag in monster_form.move_tags:
+                if tag in monster_form.move_tags or (include_any and tag == "any"):
                     monster_forms[f"res://{path}"] = (root_name, monster_form)
 
         return monster_forms
