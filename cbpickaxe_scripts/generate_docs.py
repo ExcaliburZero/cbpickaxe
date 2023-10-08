@@ -160,7 +160,7 @@ def main(argv: List[str]) -> int:
     generate_monster_form_pages(
         config, hoylake, monster_form_template, monster_forms, roots
     )
-    generate_move_pages(config, hoylake, move_template, moves)
+    generate_move_pages(config, hoylake, move_template, moves, roots)
 
     return SUCCESS
 
@@ -244,6 +244,7 @@ def generate_move_pages(
     hoylake: cbp.Hoylake,
     move_template: j2.Template,
     moves: Dict[str, Tuple[str, cbp.Move]],
+    roots: List[Root],
 ) -> None:
     for move_path, (root_name, move) in moves.items():
         if not config.moves.include_official and root_name == OFFICIAL_ROOT_NAME:
@@ -259,6 +260,7 @@ def generate_move_pages(
                 move,
                 hoylake,
                 move_template,
+                roots,
                 output_stream,
             )
 
@@ -416,6 +418,7 @@ def create_move_page(
     move: cbp.Move,
     hoylake: cbp.Hoylake,
     template: j2.Template,
+    roots: List[Root],
     output_stream: IO[str],
 ) -> None:
     compatible_monsters = hoylake.get_monster_forms_by_tags(move.tags)
@@ -447,6 +450,25 @@ def create_move_page(
                     for _, (monster_root, monster_form) in compatible_monsters.items()
                 ],
                 key=lambda d: (d["bestiary_index_raw"], d["name"]),
+            ),
+            roots=sorted(
+                [
+                    {
+                        "name": root.name,
+                        "monsters": [True] if root.has_monsters else [],
+                        "moves": [True] if root.has_moves else [],
+                        "root_link": str(
+                            special_relative_to(
+                                config.moves_dir,
+                                config.output_directory / "index.html",
+                                config.output_directory,
+                            )
+                        )
+                        + f"#{root.name}",
+                    }
+                    for root in roots
+                ],
+                key=lambda d: d["name"],
             ),
         )
     )
