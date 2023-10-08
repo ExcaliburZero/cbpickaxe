@@ -31,6 +31,27 @@
       <h2>Description</h2>
       <p>{{ description }}</p>
     </div>
+    <div class="row table-responsive">
+      <h2>Monsters</h2>
+      <table class="table" data-toggle="table">
+        <thead>
+          <tr>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Species</th>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Num</th>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for monster in compatible_monsters %}
+          <tr>
+            <td style="white-space: nowrap;"><a href="{{ monster.link }}">{{ monster.name }}</a></td>
+            <td style="white-space: nowrap;">{{ monster.bestiary_index }}</td>
+            <td style="white-space: nowrap;">{{ monster.type }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>

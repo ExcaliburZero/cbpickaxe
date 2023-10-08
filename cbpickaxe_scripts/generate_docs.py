@@ -236,6 +236,16 @@ def get_move_link(hoylake: cbp.Hoylake, root_name: str, move: cbp.Move) -> str:
     raise NotImplementedError()
 
 
+def get_monster_form_link(
+    hoylake: cbp.Hoylake, root_name: str, monster_form: cbp.MonsterForm
+) -> str:
+    if root_name == OFFICIAL_ROOT_NAME:
+        move_name = hoylake.translate(monster_form.name)
+        return f"https://wiki.cassettebeasts.com/wiki/{move_name.replace(' ', '_')}"
+
+    raise NotImplementedError()
+
+
 def create_monster_form_page(
     _path: str,
     monster_form: cbp.MonsterForm,
@@ -317,7 +327,7 @@ def create_move_page(
     template: j2.Template,
     output_stream: IO[str],
 ) -> None:
-    _compatible_moves = hoylake.get_monster_forms_by_tags(move.tags)
+    compatible_monsters = hoylake.get_monster_forms_by_tags(move.tags)
 
     output_stream.write(
         template.render(
@@ -325,6 +335,23 @@ def create_move_page(
             elemental_type=move.elemental_types[0].capitalize()
             if len(move.elemental_types) > 0
             else "Typeless",
+            description=hoylake.translate(move.description),
+            compatible_monsters=sorted(
+                [
+                    {
+                        "name": hoylake.translate(monster_form.name),
+                        "bestiary_index": f"{'-' if monster_form.bestiary_index < 0 else ''}{abs(monster_form.bestiary_index):03d}",
+                        "type": monster_form.elemental_types[0].capitalize()
+                        if len(monster_form.elemental_types) > 0
+                        else "Typeless",
+                        "link": get_monster_form_link(
+                            hoylake, monster_root, monster_form
+                        ),
+                    }
+                    for _, (monster_root, monster_form) in compatible_monsters.items()
+                ],
+                key=lambda d: (d["bestiary_index"], d["name"]),
+            ),
         )
     )
 
