@@ -33,12 +33,12 @@
             {% endfor %}
         </ul>
       </div>
-      <div class="col-12 col-lg-10">
-        <main>
+      <div class="col-12 col-lg-10 d-flex flex-column min-vh-100">
+        <main class="wrapper flex-grow-1">
           {% block content %}{% endblock %}
         </main>
         <div class="container">
-          <footer class="py-5">
+          <footer class="pt-5 pb-2">
             <p>Documentation generated using <a href="https://github.com/ExcaliburZero/cbpickaxe">cbpickaxe</a>
             </p>
           </footer>
