@@ -406,7 +406,7 @@ def create_monster_form_page(
                     }
                     for root in roots
                 ],
-                key=lambda d: d["name"],
+                key=lambda d: (d["name"] == OFFICIAL_ROOT_NAME, d["name"]),
             ),
         )
     )
@@ -468,7 +468,7 @@ def create_move_page(
                     }
                     for root in roots
                 ],
-                key=lambda d: d["name"],
+                key=lambda d: (d["name"] == OFFICIAL_ROOT_NAME, d["name"]),
             ),
         )
     )
