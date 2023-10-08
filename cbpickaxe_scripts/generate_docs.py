@@ -116,6 +116,13 @@ class Config:
         )
 
 
+@dataclass
+class Root:
+    name: str
+    has_moves: bool
+    has_monsters: bool
+
+
 def main(argv: List[str]) -> int:
     parser = argparse.ArgumentParser()
 
@@ -149,9 +156,11 @@ def main(argv: List[str]) -> int:
     monster_forms = load_monster_forms(config, hoylake)
     moves = load_moves(config, hoylake)
 
-    generate_monster_form_pages(config, hoylake, monster_form_template, monster_forms)
+    roots = generate_index_page(config, hoylake, index_template, monster_forms, moves)
+    generate_monster_form_pages(
+        config, hoylake, monster_form_template, monster_forms, roots
+    )
     generate_move_pages(config, hoylake, move_template, moves)
-    generate_index_page(config, hoylake, index_template, monster_forms, moves)
 
     return SUCCESS
 
@@ -186,10 +195,10 @@ def generate_index_page(
     template: j2.Template,
     monster_forms: Dict[str, Tuple[str, cbp.MonsterForm]],
     moves: Dict[str, Tuple[str, cbp.Move]],
-) -> None:
+) -> List[Root]:
     index_filepath = config.output_directory / "index.html"
     with open(index_filepath, "w", encoding="utf-8") as output_stream:
-        create_index_page(
+        return create_index_page(
             config, hoylake, template, monster_forms, moves, output_stream
         )
 
@@ -199,6 +208,7 @@ def generate_monster_form_pages(
     hoylake: cbp.Hoylake,
     monster_form_template: j2.Template,
     monster_forms: Dict[str, Tuple[str, cbp.MonsterForm]],
+    roots: List[Root],
 ) -> None:
     for monster_path, (root_name, monster_form) in monster_forms.items():
         if (
@@ -224,6 +234,7 @@ def generate_monster_form_pages(
                 monster_form_template,
                 config.monster_forms_dir,
                 monster_form_images_dir,
+                roots,
                 output_stream,
             )
 
@@ -310,6 +321,7 @@ def create_monster_form_page(
     template: j2.Template,
     dest_dir: pathlib.Path,
     images_dir: pathlib.Path,
+    roots: List[Root],
     output_stream: IO[str],
 ) -> None:
     compatible_moves = hoylake.get_moves_by_tags(monster_form.move_tags + ["any"])
@@ -375,6 +387,25 @@ def create_monster_form_page(
                 ],
                 key=lambda m: m["name"],
             ),
+            roots=sorted(
+                [
+                    {
+                        "name": root.name,
+                        "monsters": [True] if root.has_monsters else [],
+                        "moves": [True] if root.has_moves else [],
+                        "root_link": str(
+                            special_relative_to(
+                                config.monster_forms_dir,
+                                config.output_directory / "index.html",
+                                config.output_directory,
+                            )
+                        )
+                        + f"#{root.name}",
+                    }
+                    for root in roots
+                ],
+                key=lambda d: d["name"],
+            ),
         )
     )
 
@@ -428,7 +459,7 @@ def create_index_page(
     monster_forms: Dict[str, Tuple[str, cbp.MonsterForm]],
     moves: Dict[str, Tuple[str, cbp.Move]],
     output_stream: IO[str],
-) -> None:
+) -> List[Root]:
     roots = {root for _, (root, _) in monster_forms.items()} | {
         root for _, (root, _) in moves.items()
     }
@@ -462,6 +493,15 @@ def create_index_page(
         for root in roots
     }
 
+    list_of_roots = [
+        Root(
+            name=root_name,
+            has_monsters=len(root_monsters) > 0,
+            has_moves=len(root_moves) > 0,
+        )
+        for root_name, (root_monsters, root_moves) in data_by_root.items()
+    ]
+
     current_dir = config.output_directory
 
     output_stream.write(
@@ -478,22 +518,6 @@ def create_index_page(
                             )
                         )
                         + f"#{root}",
-                        "monsters_link": str(
-                            special_relative_to(
-                                current_dir,
-                                config.output_directory / "index.html",
-                                config.output_directory,
-                            )
-                        )
-                        + f"#{root}_monsters",
-                        "moves_link": str(
-                            special_relative_to(
-                                current_dir,
-                                config.output_directory / "index.html",
-                                config.output_directory,
-                            )
-                        )
-                        + f"#{root}_moves",
                         "monsters": sorted(
                             [
                                 {
@@ -558,6 +582,8 @@ def create_index_page(
             )
         )
     )
+
+    return list_of_roots
 
 
 def get_idle_frame(

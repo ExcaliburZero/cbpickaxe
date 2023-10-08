@@ -19,13 +19,14 @@
           <li class="list-unstyled border-0 p-2"><a href="{{ root.root_link }}" class="text-light">{{ root.name }}</a>
             {% if root.moves|length > 0 %}
             <ul>
-              <li class="list-unstyled border-0 p-2"><a href="{{ root.moves_link }}" class="text-light">Moves</a>
+              <li class="list-unstyled border-0 p-2"><a href="{{ root.root_link }}_moves" class="text-light">Moves</a>
               </li>
             </ul>
             {% endif %}
             {% if root.monsters|length > 0 %}
             <ul>
-              <li class="list-unstyled border-0 p-2"><a href="{{ root.monsters_link }}" class="text-light">Monsters</a>
+              <li class="list-unstyled border-0 p-2"><a href="{{ root.root_link }}_monsters"
+                  class="text-light">Monsters</a>
               </li>
             </ul>
             {% endif %}
