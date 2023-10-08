@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,missing-class-docstring
 from dataclasses import dataclass
-from typing import Any, cast, Dict, IO, List
+from typing import Any, cast, Dict, IO, List, Tuple
 
 import argparse
 import logging
@@ -134,6 +134,17 @@ def main(argv: List[str]) -> int:
     for name, root in config.roots.items():
         hoylake.load_root(name, pathlib.Path(root))
 
+    monster_forms = load_monster_forms(config, hoylake)
+    _ = load_moves(config, hoylake)
+
+    generate_monster_form_pages(config, hoylake, monster_form_template, monster_forms)
+
+    return SUCCESS
+
+
+def load_monster_forms(
+    config: Config, hoylake: cbp.Hoylake
+) -> Dict[str, Tuple[str, cbp.MonsterForm]]:
     monster_forms = {}
     for monsters_path in OFFICIAL_MONSTER_FORM_PATHS + config.monster_forms.paths:
         if monsters_path.endswith(".tres"):
@@ -141,21 +152,38 @@ def main(argv: List[str]) -> int:
         else:
             monster_forms.update(hoylake.load_monster_forms(monsters_path))
 
+    return monster_forms
+
+
+def load_moves(config: Config, hoylake: cbp.Hoylake) -> Dict[str, Tuple[str, cbp.Move]]:
+    moves = {}
     for moves_path in OFFICIAL_MOVE_PATHS + config.moves.paths:
-        _ = hoylake.load_moves(moves_path)
+        if moves_path.endswith(".tres"):
+            moves[moves_path] = hoylake.load_move(moves_path)
+        else:
+            moves.update(hoylake.load_moves(moves_path))
 
-    monster_forms_dir = config.output_directory / "monsters"
-    monster_forms_dir.mkdir()
+    return moves
 
-    monster_form_images_dir = monster_forms_dir / "sprites"
-    monster_form_images_dir.mkdir()
 
+def generate_monster_form_pages(
+    config: Config,
+    hoylake: cbp.Hoylake,
+    monster_form_template: j2.Template,
+    monster_forms: Dict[str, Tuple[str, cbp.MonsterForm]],
+) -> None:
     for monster_path, (root_name, monster_form) in monster_forms.items():
         if (
             not config.monster_forms.include_official
             and root_name == OFFICIAL_ROOT_NAME
         ):
             continue
+
+        monster_forms_dir = config.output_directory / "monsters"
+        monster_forms_dir.mkdir(exist_ok=True)
+
+        monster_form_images_dir = monster_forms_dir / "sprites"
+        monster_form_images_dir.mkdir(exist_ok=True)
 
         monster_page_filepath = monster_forms_dir / (
             hoylake.translate(monster_form.name) + ".html"
@@ -170,8 +198,6 @@ def main(argv: List[str]) -> int:
                 monster_form_images_dir,
                 output_stream,
             )
-
-    return SUCCESS
 
 
 def get_move_link(hoylake: cbp.Hoylake, root_name: str, move: cbp.Move) -> str:
