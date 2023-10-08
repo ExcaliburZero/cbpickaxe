@@ -75,6 +75,14 @@ class Config:
     monster_forms: MonsterForms
     moves: Moves
 
+    @property
+    def monster_forms_dir(self) -> pathlib.Path:
+        return self.output_directory / "monsters"
+
+    @property
+    def moves_dir(self) -> pathlib.Path:
+        return self.output_directory / "moves"
+
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "Config":
         output_directory = d.get("output_directory", "docs")
@@ -128,6 +136,7 @@ def main(argv: List[str]) -> int:
     )
     monster_form_template = env.get_template("monster_form.html")
     move_template = env.get_template("move.html")
+    index_template = env.get_template("index.html")
 
     if config.output_directory.exists():
         shutil.rmtree(config.output_directory)
@@ -142,6 +151,7 @@ def main(argv: List[str]) -> int:
 
     generate_monster_form_pages(config, hoylake, monster_form_template, monster_forms)
     generate_move_pages(config, hoylake, move_template, moves)
+    generate_index_page(config, hoylake, index_template, monster_forms, moves)
 
     return SUCCESS
 
@@ -170,6 +180,20 @@ def load_moves(config: Config, hoylake: cbp.Hoylake) -> Dict[str, Tuple[str, cbp
     return moves
 
 
+def generate_index_page(
+    config: Config,
+    hoylake: cbp.Hoylake,
+    template: j2.Template,
+    monster_forms: Dict[str, Tuple[str, cbp.MonsterForm]],
+    moves: Dict[str, Tuple[str, cbp.Move]],
+) -> None:
+    index_filepath = config.output_directory / "index.html"
+    with open(index_filepath, "w", encoding="utf-8") as output_stream:
+        create_index_page(
+            config, hoylake, template, monster_forms, moves, output_stream
+        )
+
+
 def generate_monster_form_pages(
     config: Config,
     hoylake: cbp.Hoylake,
@@ -183,13 +207,12 @@ def generate_monster_form_pages(
         ):
             continue
 
-        monster_forms_dir = config.output_directory / "monsters"
-        monster_forms_dir.mkdir(exist_ok=True)
+        config.monster_forms_dir.mkdir(exist_ok=True)
 
-        monster_form_images_dir = monster_forms_dir / "sprites"
+        monster_form_images_dir = config.monster_forms_dir / "sprites"
         monster_form_images_dir.mkdir(exist_ok=True)
 
-        monster_page_filepath = monster_forms_dir / (
+        monster_page_filepath = config.monster_forms_dir / (
             hoylake.translate(monster_form.name) + ".html"
         )
         with open(monster_page_filepath, "w", encoding="utf-8") as output_stream:
@@ -198,7 +221,7 @@ def generate_monster_form_pages(
                 monster_form,
                 hoylake,
                 monster_form_template,
-                monster_forms_dir,
+                config.monster_forms_dir,
                 monster_form_images_dir,
                 output_stream,
             )
@@ -214,12 +237,12 @@ def generate_move_pages(
         if not config.moves.include_official and root_name == OFFICIAL_ROOT_NAME:
             continue
 
-        moves_dir = config.output_directory / "moves"
-        moves_dir.mkdir(exist_ok=True)
+        config.moves_dir.mkdir(exist_ok=True)
 
-        move_page_filepath = moves_dir / (hoylake.translate(move.name) + ".html")
+        move_page_filepath = config.moves_dir / (hoylake.translate(move.name) + ".html")
         with open(move_page_filepath, "w", encoding="utf-8") as output_stream:
             create_move_page(
+                config,
                 move_path,
                 move,
                 hoylake,
@@ -237,13 +260,21 @@ def get_move_link(hoylake: cbp.Hoylake, root_name: str, move: cbp.Move) -> str:
 
 
 def get_monster_form_link(
-    hoylake: cbp.Hoylake, root_name: str, monster_form: cbp.MonsterForm
+    config: Config,
+    hoylake: cbp.Hoylake,
+    root_name: str,
+    monster_form: cbp.MonsterForm,
+    current_dir: pathlib.Path,
 ) -> str:
-    if root_name == OFFICIAL_ROOT_NAME:
+    if root_name == OFFICIAL_ROOT_NAME and not config.monster_forms.include_official:
         move_name = hoylake.translate(monster_form.name)
         return f"https://wiki.cassettebeasts.com/wiki/{move_name.replace(' ', '_')}"
 
-    raise NotImplementedError()
+    monster_filepath = config.monster_forms_dir / (
+        hoylake.translate(monster_form.name) + ".html"
+    )
+
+    return str(monster_filepath.relative_to(current_dir))
 
 
 def create_monster_form_page(
@@ -321,6 +352,7 @@ def create_monster_form_page(
 
 
 def create_move_page(
+    config: Config,
     _path: str,
     move: cbp.Move,
     hoylake: cbp.Hoylake,
@@ -341,17 +373,96 @@ def create_move_page(
                     {
                         "name": hoylake.translate(monster_form.name),
                         "bestiary_index": f"{'-' if monster_form.bestiary_index < 0 else ''}{abs(monster_form.bestiary_index):03d}",
+                        "bestiary_index_raw": monster_form.bestiary_index,
                         "type": monster_form.elemental_types[0].capitalize()
                         if len(monster_form.elemental_types) > 0
                         else "Typeless",
                         "link": get_monster_form_link(
-                            hoylake, monster_root, monster_form
+                            config,
+                            hoylake,
+                            monster_root,
+                            monster_form,
+                            config.moves_dir,
                         ),
                     }
                     for _, (monster_root, monster_form) in compatible_monsters.items()
                 ],
-                key=lambda d: (d["bestiary_index"], d["name"]),
+                key=lambda d: (d["bestiary_index_raw"], d["name"]),
             ),
+        )
+    )
+
+
+def create_index_page(
+    config: Config,
+    hoylake: cbp.Hoylake,
+    template: j2.Template,
+    monster_forms: Dict[str, Tuple[str, cbp.MonsterForm]],
+    moves: Dict[str, Tuple[str, cbp.Move]],
+    output_stream: IO[str],
+) -> None:
+    roots = {root for _, (root, _) in monster_forms.items()} | {
+        root for _, (root, _) in moves.items()
+    }
+    if not config.monster_forms.include_official and not config.moves.include_official:
+        roots.discard(OFFICIAL_ROOT_NAME)
+
+    data_by_root = {
+        root: (
+            [
+                (monster_path, monster_form)
+                for monster_path, (
+                    monster_root,
+                    monster_form,
+                ) in monster_forms.items()
+                if monster_root == root
+                and (
+                    config.monster_forms.include_official
+                    or monster_root != OFFICIAL_ROOT_NAME
+                )
+            ],
+            None,
+        )
+        for root in roots
+    }
+
+    output_stream.write(
+        template.render(
+            roots=sorted(
+                [
+                    {
+                        "name": root,
+                        "monsters": sorted(
+                            [
+                                {
+                                    "name": hoylake.translate(monster_form.name),
+                                    "bestiary_index": f"{'-' if monster_form.bestiary_index < 0 else ''}{abs(monster_form.bestiary_index):03d}",
+                                    "bestiary_index_raw": monster_form.bestiary_index,
+                                    "type": monster_form.elemental_types[0].capitalize()
+                                    if len(monster_form.elemental_types) > 0
+                                    else "Typeless",
+                                    "link": get_monster_form_link(
+                                        config,
+                                        hoylake,
+                                        root,
+                                        monster_form,
+                                        config.output_directory,
+                                    ),
+                                }
+                                for _, monster_form in root_monster_forms
+                            ],
+                            key=lambda d: (
+                                cast(Dict[str, Any], d)[
+                                    "bestiary_index_raw"
+                                ],  # casts needed to avoid a mypy type inference bug
+                                cast(Dict[str, Any], d)["name"],
+                            ),
+                        ),
+                    }
+                    for root, (root_monster_forms, root_moves) in data_by_root.items()
+                ],
+                key=lambda d: (d["name"] == OFFICIAL_ROOT_NAME, d["name"]),
+            )
         )
     )
 
