@@ -1,81 +1,62 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mod Documentation</title>
-  <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-</head>
-
-<body>
-  <div class="container">
-    {% for root in roots %}
-    <div class="row justify-content-center" style="text-align: center;">
-      <h2 id="{{ root.name }}">{{ root.name }}</h2>
-    </div>
-    {% if root.monsters|length > 0 %}
-    <div class="row table-responsive">
-      <h3 id="{{ root.name }}_monsters">Monsters</h3>
-      <table class="table" data-toggle="table">
-        <thead>
-          <tr>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Species</th>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Num</th>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for monster in root.monsters %}
-          <tr>
-            <td style="white-space: nowrap;"><a href="{{ monster.link }}">{{ monster.name }}</a></td>
-            <td style="white-space: nowrap;">{{ monster.bestiary_index }}</td>
-            <td style="white-space: nowrap;">{{ monster.type }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% endif %}
-    {% if root.moves|length > 0 %}
-    <div class="row table-responsive">
-      <h3 id="{{ root.name }}_moves">Moves</h3>
-      <table class="table" data-toggle="table">
-        <thead>
-          <tr>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Name</th>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Type</th>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Category</th>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Power</th>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Accuracy</th>
-            <th style="white-space: nowrap;" scope="col" data-sortable="true">Use Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for move in root.moves %}
-          <tr>
-            <td style="white-space: nowrap;"><a href="{{ move.link }}">{{ move.name }}</a></td>
-            <td style="white-space: nowrap;">{{ move.type }}</td>
-            <td style="white-space: nowrap;">{{ move.category }}</td>
-            <td style="white-space: nowrap;">{{ move.power }}</td>
-            <td style="white-space: nowrap;">{{ move.accuracy }}</td>
-            <td style="white-space: nowrap;">{{ move.cost }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% endif %}
-    {% endfor %}
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  {% for root in roots %}
+  <div class="row justify-content-center mt-4" style="text-align: center;">
+    <h2 id="{{ root.name }}">{{ root.name }}</h2>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-    crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
-</body>
-
-</html>
+  {% if root.monsters|length > 0 %}
+  <div class="row table-responsive">
+    <h3 id="{{ root.name }}_monsters">Monsters</h3>
+    <table class="table" data-toggle="table">
+      <thead>
+        <tr>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Species</th>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Num</th>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for monster in root.monsters %}
+        <tr>
+          <td style="white-space: nowrap;"><a href="{{ monster.link }}">{{ monster.name }}</a></td>
+          <td style="white-space: nowrap;">{{ monster.bestiary_index }}</td>
+          <td style="white-space: nowrap;">{{ monster.type }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  {% if root.moves|length > 0 %}
+  <div class="row table-responsive">
+    <h3 id="{{ root.name }}_moves">Moves</h3>
+    <table class="table" data-toggle="table">
+      <thead>
+        <tr>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Name</th>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Type</th>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Category</th>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Power</th>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Accuracy</th>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Use Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for move in root.moves %}
+        <tr>
+          <td style="white-space: nowrap;"><a href="{{ move.link }}">{{ move.name }}</a></td>
+          <td style="white-space: nowrap;">{{ move.type }}</td>
+          <td style="white-space: nowrap;">{{ move.category }}</td>
+          <td style="white-space: nowrap;">{{ move.power }}</td>
+          <td style="white-space: nowrap;">{{ move.accuracy }}</td>
+          <td style="white-space: nowrap;">{{ move.cost }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

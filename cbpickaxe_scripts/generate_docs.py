@@ -462,12 +462,38 @@ def create_index_page(
         for root in roots
     }
 
+    current_dir = config.output_directory
+
     output_stream.write(
         template.render(
             roots=sorted(
                 [
                     {
                         "name": root,
+                        "root_link": str(
+                            special_relative_to(
+                                current_dir,
+                                config.output_directory / "index.html",
+                                config.output_directory,
+                            )
+                        )
+                        + f"#{root}",
+                        "monsters_link": str(
+                            special_relative_to(
+                                current_dir,
+                                config.output_directory / "index.html",
+                                config.output_directory,
+                            )
+                        )
+                        + f"#{root}_monsters",
+                        "moves_link": str(
+                            special_relative_to(
+                                current_dir,
+                                config.output_directory / "index.html",
+                                config.output_directory,
+                            )
+                        )
+                        + f"#{root}_moves",
                         "monsters": sorted(
                             [
                                 {
