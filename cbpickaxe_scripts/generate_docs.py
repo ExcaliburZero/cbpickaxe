@@ -53,17 +53,19 @@ class MonsterForms:
 @dataclass
 class Moves:
     paths: List[str]
+    include_official: bool
 
     @staticmethod
     def from_dict(d: Dict[Any, Any]) -> "Moves":
         paths = d.get("paths", [])
+        include_official = d.get("include_official", False)
 
         assert isinstance(paths, list)
         for p in paths:
             assert isinstance(p, str)
         paths = cast(List[str], paths)
 
-        return Moves(paths)
+        return Moves(paths=paths, include_official=include_official)
 
 
 @dataclass
@@ -125,6 +127,7 @@ def main(argv: List[str]) -> int:
         loader=j2.PackageLoader("cbpickaxe_scripts"), autoescape=j2.select_autoescape()
     )
     monster_form_template = env.get_template("monster_form.html")
+    move_template = env.get_template("move.html")
 
     if config.output_directory.exists():
         shutil.rmtree(config.output_directory)
@@ -135,9 +138,10 @@ def main(argv: List[str]) -> int:
         hoylake.load_root(name, pathlib.Path(root))
 
     monster_forms = load_monster_forms(config, hoylake)
-    _ = load_moves(config, hoylake)
+    moves = load_moves(config, hoylake)
 
     generate_monster_form_pages(config, hoylake, monster_form_template, monster_forms)
+    generate_move_pages(config, hoylake, move_template, moves)
 
     return SUCCESS
 
@@ -200,6 +204,30 @@ def generate_monster_form_pages(
             )
 
 
+def generate_move_pages(
+    config: Config,
+    hoylake: cbp.Hoylake,
+    move_template: j2.Template,
+    moves: Dict[str, Tuple[str, cbp.Move]],
+) -> None:
+    for move_path, (root_name, move) in moves.items():
+        if not config.moves.include_official and root_name == OFFICIAL_ROOT_NAME:
+            continue
+
+        moves_dir = config.output_directory / "moves"
+        moves_dir.mkdir(exist_ok=True)
+
+        move_page_filepath = moves_dir / (hoylake.translate(move.name) + ".html")
+        with open(move_page_filepath, "w", encoding="utf-8") as output_stream:
+            create_move_page(
+                move_path,
+                move,
+                hoylake,
+                move_template,
+                output_stream,
+            )
+
+
 def get_move_link(hoylake: cbp.Hoylake, root_name: str, move: cbp.Move) -> str:
     if root_name == OFFICIAL_ROOT_NAME:
         move_name = hoylake.translate(move.name)
@@ -209,7 +237,7 @@ def get_move_link(hoylake: cbp.Hoylake, root_name: str, move: cbp.Move) -> str:
 
 
 def create_monster_form_page(
-    path: str,
+    _path: str,
     monster_form: cbp.MonsterForm,
     hoylake: cbp.Hoylake,
     template: j2.Template,
@@ -278,6 +306,25 @@ def create_monster_form_page(
                 ],
                 key=lambda m: m["name"],
             ),
+        )
+    )
+
+
+def create_move_page(
+    _path: str,
+    move: cbp.Move,
+    hoylake: cbp.Hoylake,
+    template: j2.Template,
+    output_stream: IO[str],
+) -> None:
+    _compatible_moves = hoylake.get_monster_forms_by_tags(move.tags)
+
+    output_stream.write(
+        template.render(
+            name=hoylake.translate(move.name),
+            elemental_type=move.elemental_types[0].capitalize()
+            if len(move.elemental_types) > 0
+            else "Typeless",
         )
     )
 
