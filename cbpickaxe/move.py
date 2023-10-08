@@ -33,6 +33,8 @@ class TargetType(enum.Enum):
             return "Single"
         elif self == TargetType.TARGET_TEAM:
             return "Team"
+        elif self == TargetType.TARGET_ONE_ALLY:
+            return "Single Ally"
 
         return str(self)
 
@@ -52,6 +54,10 @@ class Move:
     accuracy: int
     unavoidable: bool
     target_type: TargetType
+    min_hits: int
+    max_hits: int
+    can_be_copied: bool
+    priority: int
     tags: List[str]
     elemental_types: List[str]
 
@@ -71,6 +77,10 @@ class Move:
         accuracy = None
         unavoidable = None
         target_type = None
+        min_hits = None
+        max_hits = None
+        can_be_copied = None
+        priority = None
         tags = None
         elemental_types = None
 
@@ -86,6 +96,10 @@ class Move:
                 accuracy = section["accuracy"]
                 unavoidable = section["unavoidable"]
                 target_type = section["target_type"]
+                min_hits = section.get("min_hits", 0)
+                max_hits = section.get("max_hits", 0)
+                can_be_copied = section["can_be_copied"]
+                priority = section["priority"]
                 tags = section["tags"]
                 elemental_types = Move.__parse_elemental_types(scene, section)
 
@@ -98,6 +112,10 @@ class Move:
         assert isinstance(accuracy, int)
         assert isinstance(unavoidable, bool)
         assert isinstance(target_type, int)
+        assert isinstance(min_hits, int)
+        assert isinstance(max_hits, int)
+        assert isinstance(can_be_copied, bool)
+        assert isinstance(priority, int)
         assert isinstance(tags, list)
         assert elemental_types is not None
 
@@ -115,6 +133,10 @@ class Move:
             accuracy=accuracy,
             unavoidable=unavoidable,
             target_type=TargetType(target_type),
+            min_hits=min_hits,
+            max_hits=max_hits,
+            can_be_copied=can_be_copied,
+            priority=priority,
             tags=tags,
             elemental_types=elemental_types,
         )

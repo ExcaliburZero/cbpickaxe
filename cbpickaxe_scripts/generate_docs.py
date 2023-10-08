@@ -458,6 +458,12 @@ def create_move_page(
             power=move.power,
             accuracy=move.accuracy,
             targets=move.target_type.to_name(),
+            num_hits=move.min_hits
+            if move.min_hits == move.max_hits
+            else f"{move.min_hits} - {move.max_hits}",
+            use_cost="" if move.is_passive_only else f"{move.cost} AP",
+            copyable="Yes" if move.can_be_copied else "No",
+            priority=str(move.priority),
             compatible_monsters=sorted(
                 [
                     {

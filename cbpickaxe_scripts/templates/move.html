@@ -56,6 +56,46 @@
         </td>
       </tr>
       {% endif %}
+      {% if num_hits %}
+      <tr>
+        <th>
+          Num Hits
+        </th>
+        <td>
+          {{ num_hits }}
+        </td>
+      </tr>
+      {% endif %}
+      {% if use_cost %}
+      <tr>
+        <th>
+          Use Cost
+        </th>
+        <td>
+          {{ use_cost }}
+        </td>
+      </tr>
+      {% endif %}
+      {% if copyable %}
+      <tr>
+        <th>
+          Copyable
+        </th>
+        <td>
+          {{ copyable }}
+        </td>
+      </tr>
+      {% endif %}
+      {% if priority %}
+      <tr>
+        <th>
+          Priority
+        </th>
+        <td>
+          {{ priority }}
+        </td>
+      </tr>
+      {% endif %}
     </table>
   </div>
   <div class="row">
