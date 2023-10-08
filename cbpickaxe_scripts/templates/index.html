@@ -37,6 +37,33 @@
         </tbody>
       </table>
     </div>
+    <div class="row table-responsive">
+      <h3>Moves</h3>
+      <table class="table" data-toggle="table">
+        <thead>
+          <tr>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Name</th>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Type</th>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Category</th>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Power</th>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Accuracy</th>
+            <th style="white-space: nowrap;" scope="col" data-sortable="true">Use Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for move in root.moves %}
+          <tr>
+            <td style="white-space: nowrap;"><a href="{{ move.link }}">{{ move.name }}</a></td>
+            <td style="white-space: nowrap;">{{ move.type }}</td>
+            <td style="white-space: nowrap;">{{ move.category }}</td>
+            <td style="white-space: nowrap;">{{ move.power }}</td>
+            <td style="white-space: nowrap;">{{ move.accuracy }}</td>
+            <td style="white-space: nowrap;">{{ move.cost }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     {% endfor %}
   </div>
 

@@ -217,6 +217,7 @@ def generate_monster_form_pages(
         )
         with open(monster_page_filepath, "w", encoding="utf-8") as output_stream:
             create_monster_form_page(
+                config,
                 monster_path,
                 monster_form,
                 hoylake,
@@ -251,12 +252,20 @@ def generate_move_pages(
             )
 
 
-def get_move_link(hoylake: cbp.Hoylake, root_name: str, move: cbp.Move) -> str:
-    if root_name == OFFICIAL_ROOT_NAME:
+def get_move_link(
+    config: Config,
+    hoylake: cbp.Hoylake,
+    root_name: str,
+    move: cbp.Move,
+    current_dir: pathlib.Path,
+) -> str:
+    if root_name == OFFICIAL_ROOT_NAME and not config.moves.include_official:
         move_name = hoylake.translate(move.name)
         return f"https://wiki.cassettebeasts.com/wiki/{move_name.replace(' ', '_')}"
 
-    raise NotImplementedError()
+    move_filepath = config.moves_dir / (hoylake.translate(move.name) + ".html")
+
+    return str(special_relative_to(current_dir, move_filepath, config.output_directory))
 
 
 def get_monster_form_link(
@@ -274,10 +283,27 @@ def get_monster_form_link(
         hoylake.translate(monster_form.name) + ".html"
     )
 
-    return str(monster_filepath.relative_to(current_dir))
+    return str(
+        special_relative_to(current_dir, monster_filepath, config.output_directory)
+    )
+
+
+def special_relative_to(
+    source_dir: pathlib.Path, dest_filepath: pathlib.Path, root: pathlib.Path
+) -> pathlib.Path:
+    num_times_to_go_up = len(source_dir.relative_to(root).parts)
+
+    filepath = dest_filepath.relative_to(root)
+
+    backs = pathlib.Path()
+    for _ in range(0, num_times_to_go_up):
+        backs = pathlib.Path("..") / backs
+
+    return backs / filepath
 
 
 def create_monster_form_page(
+    config: Config,
     _path: str,
     monster_form: cbp.MonsterForm,
     hoylake: cbp.Hoylake,
@@ -341,7 +367,9 @@ def create_monster_form_page(
                         "cost": "Passive"
                         if move.is_passive_only
                         else f"{move.cost} AP",
-                        "link": get_move_link(hoylake, move_root, move),
+                        "link": get_move_link(
+                            config, hoylake, move_root, move, config.moves_dir
+                        ),
                     }
                     for path, (move_root, move) in compatible_moves.items()
                 ],
@@ -421,7 +449,15 @@ def create_index_page(
                     or monster_root != OFFICIAL_ROOT_NAME
                 )
             ],
-            None,
+            [
+                (move_path, move_form)
+                for move_path, (
+                    move_root,
+                    move_form,
+                ) in moves.items()
+                if move_root == root
+                and (config.moves.include_official or move_root != OFFICIAL_ROOT_NAME)
+            ],
         )
         for root in roots
     }
@@ -456,6 +492,37 @@ def create_index_page(
                                     "bestiary_index_raw"
                                 ],  # casts needed to avoid a mypy type inference bug
                                 cast(Dict[str, Any], d)["name"],
+                            ),
+                        ),
+                        "moves": sorted(
+                            [
+                                {
+                                    "name": hoylake.translate(move.name),
+                                    "type": move.elemental_types[0].capitalize()
+                                    if len(move.elemental_types) > 0
+                                    else "Typeless",
+                                    "category": hoylake.translate(move.category_name),
+                                    "power": move.power if move.power > 0 else "—",
+                                    "accuracy": "Unavoidable"
+                                    if move.unavoidable
+                                    else move.accuracy,
+                                    "cost": "Passive"
+                                    if move.is_passive_only
+                                    else f"{move.cost} AP",
+                                    "link": get_move_link(
+                                        config,
+                                        hoylake,
+                                        root,
+                                        move,
+                                        config.output_directory,
+                                    ),
+                                }
+                                for _, move in root_moves
+                            ],
+                            key=lambda d: (
+                                cast(Dict[str, Any], d)[
+                                    "name"
+                                ],  # cast needed to avoid a mypy type inference bug
                             ),
                         ),
                     }
