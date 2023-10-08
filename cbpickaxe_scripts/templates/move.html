@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
+  <div class="row mt-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ move_root_link }}">{{ move_root }}</a></li>
+        <li class="breadcrumb-item">Moves</li>
+        <li class="breadcrumb-item active" aria-current="page">{{ name }}</li>
+      </ol>
+    </nav>
+  </div>
   <div class="row justify-content-center mt-4" style="text-align: center;">
     <h1>{{ name }}</h1>
   </div>

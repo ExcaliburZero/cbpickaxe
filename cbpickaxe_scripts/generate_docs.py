@@ -229,6 +229,7 @@ def generate_monster_form_pages(
             create_monster_form_page(
                 config,
                 monster_path,
+                root_name,
                 monster_form,
                 hoylake,
                 monster_form_template,
@@ -257,6 +258,7 @@ def generate_move_pages(
             create_move_page(
                 config,
                 move_path,
+                root_name,
                 move,
                 hoylake,
                 move_template,
@@ -318,6 +320,7 @@ def special_relative_to(
 def create_monster_form_page(
     config: Config,
     _path: str,
+    monster_root: str,
     monster_form: cbp.MonsterForm,
     hoylake: cbp.Hoylake,
     template: j2.Template,
@@ -339,6 +342,15 @@ def create_monster_form_page(
         template.render(
             name=hoylake.translate(monster_form.name),
             bestiary_index=f"{'-' if monster_form.bestiary_index < 0 else ''}{abs(monster_form.bestiary_index):03d}",
+            monster_root=monster_root,
+            monster_root_link=str(
+                special_relative_to(
+                    config.monster_forms_dir,
+                    config.output_directory / "index.html",
+                    config.output_directory,
+                )
+            )
+            + f"#{monster_root}",
             monster_sprite_path=""
             if monster_sprite_filepath is None
             else monster_sprite_filepath,
@@ -415,6 +427,7 @@ def create_monster_form_page(
 def create_move_page(
     config: Config,
     _path: str,
+    move_root: str,
     move: cbp.Move,
     hoylake: cbp.Hoylake,
     template: j2.Template,
@@ -426,6 +439,15 @@ def create_move_page(
     output_stream.write(
         template.render(
             name=hoylake.translate(move.name),
+            move_root=move_root,
+            move_root_link=str(
+                special_relative_to(
+                    config.monster_forms_dir,
+                    config.output_directory / "index.html",
+                    config.output_directory,
+                )
+            )
+            + f"#{move_root}",
             elemental_type=move.elemental_types[0].capitalize()
             if len(move.elemental_types) > 0
             else "Typeless",
