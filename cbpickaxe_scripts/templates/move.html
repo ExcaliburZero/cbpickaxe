@@ -14,6 +14,7 @@
 <div class="container">
   <div class="row justify-content-center mt-4" style="text-align: center;">
     <h1>{{ name }}</h1>
+    <p>{{ category }}</p>
   </div>
   <div class="row justify-content-center">
     <table class="table" style="max-width: 250px;">
@@ -25,6 +26,36 @@
           {{ elemental_type }}
         </td>
       </tr>
+      {% if power %}
+      <tr>
+        <th>
+          Power
+        </th>
+        <td>
+          {{ power }}
+        </td>
+      </tr>
+      {% endif %}
+      {% if accuracy %}
+      <tr>
+        <th>
+          Accuracy
+        </th>
+        <td>
+          {{ accuracy }}
+        </td>
+      </tr>
+      {% endif %}
+      {% if targets %}
+      <tr>
+        <th>
+          Targets
+        </th>
+        <td>
+          {{ targets }}
+        </td>
+      </tr>
+      {% endif %}
     </table>
   </div>
   <div class="row">

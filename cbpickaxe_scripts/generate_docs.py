@@ -340,6 +340,7 @@ def create_monster_form_page(
 
     output_stream.write(
         template.render(
+            title=hoylake.translate(monster_form.name),
             name=hoylake.translate(monster_form.name),
             bestiary_index=f"{'-' if monster_form.bestiary_index < 0 else ''}{abs(monster_form.bestiary_index):03d}",
             monster_root=monster_root,
@@ -438,6 +439,7 @@ def create_move_page(
 
     output_stream.write(
         template.render(
+            title=hoylake.translate(move.name),
             name=hoylake.translate(move.name),
             move_root=move_root,
             move_root_link=str(
@@ -452,6 +454,10 @@ def create_move_page(
             if len(move.elemental_types) > 0
             else "Typeless",
             description=hoylake.translate(move.description),
+            category=hoylake.translate(move.category_name),
+            power=move.power,
+            accuracy=move.accuracy,
+            targets=move.target_type.to_name(),
             compatible_monsters=sorted(
                 [
                     {
@@ -550,6 +556,7 @@ def create_index_page(
 
     output_stream.write(
         template.render(
+            title="Mod Documentation",
             roots=sorted(
                 [
                     {
@@ -623,7 +630,7 @@ def create_index_page(
                     for root, (root_monster_forms, root_moves) in data_by_root.items()
                 ],
                 key=lambda d: (d["name"] == OFFICIAL_ROOT_NAME, d["name"]),
-            )
+            ),
         )
     )
 

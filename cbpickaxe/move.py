@@ -2,9 +2,39 @@
 Classes related to moves / stickers.
 """
 from dataclasses import dataclass
-from typing import cast, IO, List
+from typing import cast, IO, List, Optional
+
+import enum
 
 import godot_parser as gp
+
+
+class TargetType(enum.Enum):
+    """
+    The targets that a move can/will hit (single, team, etc.).
+    """
+
+    TARGET_NONE = 0
+    TARGET_ONE = 1
+    TARGET_TEAM = 2
+    TARGET_ALL = 3
+    TARGET_ONE_ALLY = 4
+    TARGET_ONE_ALLY_NOT_SELF = 5
+    TARGET_ONE_ENEMY = 6
+    TARGET_ALL_NOT_SELF = 7
+
+    def to_name(self) -> Optional[str]:
+        """
+        Converts the TargetType into the string that would be shown on the wiki.
+        """
+        if self == TargetType.TARGET_NONE:
+            return None
+        elif self == TargetType.TARGET_ONE:
+            return "Single"
+        elif self == TargetType.TARGET_TEAM:
+            return "Team"
+
+        return str(self)
 
 
 @dataclass
@@ -21,6 +51,7 @@ class Move:
     power: int
     accuracy: int
     unavoidable: bool
+    target_type: TargetType
     tags: List[str]
     elemental_types: List[str]
 
@@ -39,6 +70,7 @@ class Move:
         power = None
         accuracy = None
         unavoidable = None
+        target_type = None
         tags = None
         elemental_types = None
 
@@ -53,6 +85,7 @@ class Move:
                 power = section["power"]
                 accuracy = section["accuracy"]
                 unavoidable = section["unavoidable"]
+                target_type = section["target_type"]
                 tags = section["tags"]
                 elemental_types = Move.__parse_elemental_types(scene, section)
 
@@ -64,6 +97,7 @@ class Move:
         assert isinstance(power, int)
         assert isinstance(accuracy, int)
         assert isinstance(unavoidable, bool)
+        assert isinstance(target_type, int)
         assert isinstance(tags, list)
         assert elemental_types is not None
 
@@ -80,6 +114,7 @@ class Move:
             power=power,
             accuracy=accuracy,
             unavoidable=unavoidable,
+            target_type=TargetType(target_type),
             tags=tags,
             elemental_types=elemental_types,
         )
