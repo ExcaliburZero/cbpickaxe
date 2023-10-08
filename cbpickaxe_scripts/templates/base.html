@@ -26,11 +26,20 @@
       color: #382376;
     }
 
+    .topbar {
+      background-color: #ab75e8;
+      padding-bottom: 8px;
+    }
+
+    .navbar {
+      padding-left: 12px;
+    }
+
     .sidebar {
       background-color: #ffffff;
       border-left: 10px solid #ab75e8;
       border-right: 10px solid #ab75e8;
-      border-top: 70px solid #ab75e8;
+      border-top: 10px solid #ab75e8;
       padding: 0px;
     }
 
@@ -50,15 +59,24 @@
 
     .sidebar-root {
       background-color: #ab75e8;
-      margin-top: 8px;
+      margin-top: 14px;
       margin-right: 10px;
       -webkit-clip-path: polygon(0 0, 100% 0%, 80% 100%, 0% 100%);
       clip-path: polygon(0 0, 100% 0%, 80% 100%, 0% 100%);
     }
 
+    .sidebar-root:hover {
+      background-color: #3fbb9f;
+    }
+
     .sidebar-sub {
-      margin-top: 4px;
-      margin-left: 10px;
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+      padding-left: 20px !important;
+    }
+
+    .sidebar-sub:hover {
+      background-color: #3fbb9f;
     }
   </style>
 </head>
@@ -69,16 +87,18 @@
       <div class="col-2 d-none d-lg-block min-vh-100 sidebar">
         <div>
           {% for root in roots %}
-          <div class="list-unstyled border-0 p-2 sidebar-root"><a href="{{ root.root_link }}"
-              class="sidebar-root-link">{{
+          <div class="list-unstyled border-0 p-2 sidebar-root" style="cursor: pointer;"
+            onclick="window.location='{{ root.root_link }}'"><a href="{{ root.root_link }}" class="sidebar-root-link">{{
               root.name }}</a></div>
           {% if root.moves|length > 0 %}
-          <div class="list-unstyled border-0 p-2 sidebar-sub"><a href="{{ root.root_link }}_moves"
+          <div class="list-unstyled border-0 p-2 sidebar-sub" style="cursor: pointer;"
+            onclick="window.location='{{ root.root_link }}_moves'"><a href="{{ root.root_link }}_moves"
               class="sidebar-sub-link">Moves</a>
           </div>
           {% endif %}
           {% if root.monsters|length > 0 %}
-          <div class="list-unstyled border-0 p-2 sidebar-sub"><a href="{{ root.root_link }}_monsters"
+          <div class="list-unstyled border-0 p-2 sidebar-sub" style="cursor: pointer;"
+            onclick="window.location='{{ root.root_link }}_monsters'"><a href="{{ root.root_link }}_monsters"
               class="sidebar-sub-link">Monsters</a>
           </div>
           {% endif %}
@@ -87,6 +107,7 @@
       </div>
       <div class="col-12 col-lg-10 d-flex flex-column min-vh-100">
         <main class="wrapper flex-grow-1">
+          {% block navbar %}{% endblock %}
           {% block content %}{% endblock %}
         </main>
         <div class="container">
