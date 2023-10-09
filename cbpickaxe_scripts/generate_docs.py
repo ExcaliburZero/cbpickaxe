@@ -237,16 +237,22 @@ def create_new_config(config_filepath: pathlib.Path) -> int:
         if has_monsters:
             output_stream.write("[monsters]\n")
             output_stream.write(
-                "paths = [] # TODO: add the 'res://...' path to the folder where you keep the monster_form \".tres\" files\n"
+                'paths = [\n   "res://mods/my_mod/my_monsters/" # TODO: replace with the \'res://...\' path to the folder where you keep the monster_form ".tres" files\n]\n'
             )
             output_stream.write("\n")
 
         if has_moves:
-            output_stream.write("[moes]\n")
+            output_stream.write("[moves]\n")
             output_stream.write(
-                "paths = [] # TODO: add the 'res://...' path to the folder where you keep the move \".tres\" files\n"
+                'paths = [\n   "res://mods/my_mod/my_moves/" # TODO: replace with the \'res://...\' path to the folder where you keep the move ".tres" files\n]\n'
             )
             output_stream.write("\n")
+
+    print("===========================")
+    print("Successfully generated configuration file:", config_filepath)
+    print(
+        "Edit it in a text editor to fill in any remaining fields (ex. monster form and move paths)"
+    )
 
     return SUCCESS
 
