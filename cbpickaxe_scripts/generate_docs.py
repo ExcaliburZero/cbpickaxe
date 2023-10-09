@@ -146,7 +146,7 @@ def main(argv: List[str]) -> int:
         return build_documentation(pathlib.Path(args.config), args.locale)
     else:
         logging.error(f"Unrecognized command: {args.command}")
-        return False
+        return FAILURE
 
 
 def build_documentation(config_filepath: pathlib.Path, locale: str) -> int:
