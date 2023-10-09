@@ -1,4 +1,5 @@
 /data/
+/regression_tests/work_dirs/
 
 .vscode/
 

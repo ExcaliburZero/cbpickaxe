@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import os
 import pathlib
@@ -16,6 +16,7 @@ class Util:
         name: str
         command: List[str]
         expected_files: List[str]
+        stdin: Optional[List[str]] = None
 
         def test(self) -> None:
             work_dir = self.get_work_dir()
@@ -48,7 +49,17 @@ class Util:
             work_dir.mkdir(parents=True, exist_ok=not clear_if_exists)
 
         def run_command(self, work_dir: pathlib.Path) -> None:
-            subprocess.check_call(self.command, cwd=work_dir)
+            process = subprocess.Popen(
+                self.command,
+                cwd=work_dir,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            if self.stdin is not None:
+                process.communicate(input="\n".join(self.stdin).encode("utf-8"))
+            else:
+                process.communicate()
 
         def diff_against_baselines(self, work_dir: pathlib.Path) -> None:
             baseline_dir = self.get_baseline_dir()
