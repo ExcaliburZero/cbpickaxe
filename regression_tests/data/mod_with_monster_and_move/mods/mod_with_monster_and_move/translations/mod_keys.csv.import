@@ -1,0 +1,16 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+
+[deps]
+
+files=[ "res://translation/mod_keys.en.translation" ]
+
+source_file="res://translation/mod_keys.csv"
+dest_files=[ "res://translation/mod_keys.en.translation" ]
+
+[params]
+
+compress=true
+delimiter=0

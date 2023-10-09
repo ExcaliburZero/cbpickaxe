@@ -1,0 +1,10 @@
+output_directory = "docs"
+
+[roots]
+cassette_beasts = "../../data/empty_cassette_beasts"
+mod_a = "../../data/mod_with_monster_and_move"
+
+[moves]
+paths = [
+    "res://mods/mod_with_monster_and_move/battle_moves/"
+]

@@ -16,6 +16,17 @@ class TestRegressionGenerateDocsBuildEmptyMod(Util.TestRegression):
     expected_files = ["docs/index.html"]
 
 
+class TestRegressionGenerateDocsBuildModWithMoves(Util.TestRegression):
+    name = "generate_docs_build_mod_with_moves"
+    command = [
+        "cbpickaxe_generate_docs",
+        "build",
+        "--config",
+        rel_data("docs_moves.toml"),
+    ]
+    expected_files = ["docs/index.html"]
+
+
 if __name__ == "__main__":
     tests = []
     for name, obj in inspect.getmembers(sys.modules[__name__]):
