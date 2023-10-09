@@ -124,6 +124,8 @@ class Root:
 
 
 def main(argv: List[str]) -> int:
+    logging.basicConfig(level=logging.WARN, format="%(levelname)s> %(message)s")
+
     parser = argparse.ArgumentParser()
 
     subparsers = parser.add_subparsers(dest="command", required=True)
