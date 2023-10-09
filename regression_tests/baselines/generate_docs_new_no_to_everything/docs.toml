@@ -1,6 +1,6 @@
 output_directory = "docs"
 
 [roots]
-Cassette Beasts = "../my_cassette_beasts"
+cassette_beasts = "../my_cassette_beasts"
 Traffikrabdos = "."
 

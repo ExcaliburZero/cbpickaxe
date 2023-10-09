@@ -1,0 +1,4 @@
+output_directory = "docs"
+
+[roots]
+cassette_beasts = "../../data/fake_cassette_beasts"

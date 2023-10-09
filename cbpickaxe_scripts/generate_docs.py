@@ -22,7 +22,7 @@ SOURCE_DIR = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = SOURCE_DIR / "templates"
 MONSTER_FORM_TEMPLATE = TEMPLATES_DIR / "monster_form.html.template"
 
-OFFICIAL_ROOT_NAME = "Cassette Beasts"
+OFFICIAL_ROOT_NAME = "cassette_beasts"
 OFFICIAL_MONSTER_FORM_PATHS = [
     "res://data/monster_forms/",
     "res://data/monster_forms_secret/",
@@ -131,7 +131,7 @@ def main(argv: List[str]) -> int:
     build_parser = subparsers.add_parser(
         "build", description="Build the documentation for the mod."
     )
-    build_parser.add_argument("--config", nargs="+", default="docs.toml")
+    build_parser.add_argument("--config", default="docs.toml")
     build_parser.add_argument("--locale", default="en")
 
     _ = subparsers.add_parser(
@@ -204,7 +204,7 @@ def create_new_config(config_filepath: pathlib.Path) -> int:
 
     current_dir_name = pathlib.Path().absolute().name
 
-    mod_name = input("Enter the name of your mod (spaces are allowed): ")
+    mod_name = input("Enter the name of your mod (no spaces, underscores allowed): ")
     has_monsters_str = input(
         "Does your mod add any new monster species [y/n]: "
     ).lower()
