@@ -24,7 +24,7 @@ class TestRegressionGenerateDocsBuildModWithMoves(Util.TestRegression):
         "--config",
         rel_data("docs_moves.toml"),
     ]
-    expected_files = ["docs/index.html"]
+    expected_files = ["docs/index.html", "docs/moves/Fire Spit.html"]
 
 
 if __name__ == "__main__":
