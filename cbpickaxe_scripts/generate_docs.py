@@ -22,7 +22,7 @@ SOURCE_DIR = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = SOURCE_DIR / "templates"
 MONSTER_FORM_TEMPLATE = TEMPLATES_DIR / "monster_form.html.template"
 
-OFFICIAL_ROOT_NAME = "cassette_beasts"
+OFFICIAL_ROOT_NAME = "Cassette Beasts"
 OFFICIAL_MONSTER_FORM_PATHS = [
     "res://data/monster_forms/",
     "res://data/monster_forms_secret/",
@@ -126,41 +126,127 @@ class Root:
 def main(argv: List[str]) -> int:
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--config", nargs="+", default="docs.toml")
-    parser.add_argument("--locale", default="en")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    build_parser = subparsers.add_parser(
+        "build", description="Build the documentation for the mod."
+    )
+    build_parser.add_argument("--config", nargs="+", default="docs.toml")
+    build_parser.add_argument("--locale", default="en")
+
+    _ = subparsers.add_parser(
+        "new", description="Create a configuration file for the mod's documentation."
+    )
 
     args = parser.parse_args(argv)
 
-    with open(args.config, "rb") as input_stream:
-        try:
-            config = Config.from_dict(tomllib.load(input_stream))
-        except ValueError:
-            logging.error("Failed to load configration file. See error(s) above.")
+    if args.command == "new":
+        return create_new_config(pathlib.Path("docs.toml"))
+    elif args.command == "build":
+        if not pathlib.Path(args.config).exists():
+            logging.error(
+                f"Could not find documentation configuration file: {args.config}"
+            )
+            logging.error(
+                "If you do not already have one, you should run `cbpickaxe_generate_docs new` to create one."
+            )
             return FAILURE
 
-    env = j2.Environment(
-        loader=j2.PackageLoader("cbpickaxe_scripts"), autoescape=j2.select_autoescape()
+        with open(args.config, "rb") as input_stream:
+            toml_data = tomllib.load(input_stream)
+            try:
+                config = Config.from_dict(toml_data)
+            except ValueError:
+                logging.error("Failed to load configration file. See error(s) above.")
+                return FAILURE
+
+        env = j2.Environment(
+            loader=j2.PackageLoader("cbpickaxe_scripts"),
+            autoescape=j2.select_autoescape(),
+        )
+        monster_form_template = env.get_template("monster_form.html")
+        move_template = env.get_template("move.html")
+        index_template = env.get_template("index.html")
+
+        if config.output_directory.exists():
+            shutil.rmtree(config.output_directory)
+        config.output_directory.mkdir()
+
+        hoylake = cbp.Hoylake(default_locale=args.locale)
+        for name, root in config.roots.items():
+            hoylake.load_root(name, pathlib.Path(root))
+
+        monster_forms = load_monster_forms(config, hoylake)
+        moves = load_moves(config, hoylake)
+
+        roots = generate_index_page(
+            config, hoylake, index_template, monster_forms, moves
+        )
+        generate_monster_form_pages(
+            config, hoylake, monster_form_template, monster_forms, roots
+        )
+        generate_move_pages(config, hoylake, move_template, moves, roots)
+
+        return SUCCESS
+    else:
+        logging.error(f"Unrecognized command: {args.command}")
+        return False
+
+
+def create_new_config(config_filepath: pathlib.Path) -> int:
+    if config_filepath.exists():
+        overwrite = input(
+            f'There is already a documentation config file at "{config_filepath}". Would you like to overwrite it? [y/n]: '
+        ).lower()
+
+        if overwrite not in {"y", "yes"}:
+            return FAILURE
+
+    current_dir_name = pathlib.Path().absolute().name
+
+    mod_name = input("Enter the name of your mod (spaces are allowed): ")
+    has_monsters_str = input(
+        "Does your mod add any new monster species [y/n]: "
+    ).lower()
+    has_moves_str = input("Does your mod add any new moves/stickers [y/n]: ").lower()
+    cassette_beasts_path = input(
+        "Enter the path to your decompiled copy of Cassette Beasts: "
     )
-    monster_form_template = env.get_template("monster_form.html")
-    move_template = env.get_template("move.html")
-    index_template = env.get_template("index.html")
 
-    if config.output_directory.exists():
-        shutil.rmtree(config.output_directory)
-    config.output_directory.mkdir()
+    cassette_beasts_path = cassette_beasts_path.replace('"', "")
 
-    hoylake = cbp.Hoylake(default_locale=args.locale)
-    for name, root in config.roots.items():
-        hoylake.load_root(name, pathlib.Path(root))
+    if mod_name == "":
+        mod_name = current_dir_name
+    if has_monsters_str == "":
+        has_monsters_str = "n"
+    if has_moves_str == "":
+        has_moves_str = "n"
 
-    monster_forms = load_monster_forms(config, hoylake)
-    moves = load_moves(config, hoylake)
+    has_monsters = has_monsters_str in {"y", "yes"}
+    has_moves = has_moves_str in {"y", "yes"}
 
-    roots = generate_index_page(config, hoylake, index_template, monster_forms, moves)
-    generate_monster_form_pages(
-        config, hoylake, monster_form_template, monster_forms, roots
-    )
-    generate_move_pages(config, hoylake, move_template, moves, roots)
+    with open(config_filepath, "w", encoding="utf-8") as output_stream:
+        output_stream.write('output_directory = "docs"\n')
+        output_stream.write("\n")
+
+        output_stream.write("[roots]\n")
+        output_stream.write(f'{OFFICIAL_ROOT_NAME} = "{cassette_beasts_path}"\n')
+        output_stream.write(f'{mod_name} = "."\n')
+        output_stream.write("\n")
+
+        if has_monsters:
+            output_stream.write("[monsters]\n")
+            output_stream.write(
+                "paths = [] # TODO: add the 'res://...' path to the folder where you keep the monster_form \".tres\" files\n"
+            )
+            output_stream.write("\n")
+
+        if has_moves:
+            output_stream.write("[moes]\n")
+            output_stream.write(
+                "paths = [] # TODO: add the 'res://...' path to the folder where you keep the move \".tres\" files\n"
+            )
+            output_stream.write("\n")
 
     return SUCCESS
 
