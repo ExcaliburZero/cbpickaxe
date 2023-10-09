@@ -143,54 +143,56 @@ def main(argv: List[str]) -> int:
     if args.command == "new":
         return create_new_config(pathlib.Path("docs.toml"))
     elif args.command == "build":
-        if not pathlib.Path(args.config).exists():
-            logging.error(
-                f"Could not find documentation configuration file: {args.config}"
-            )
-            logging.error(
-                "If you do not already have one, you should run `cbpickaxe_generate_docs new` to create one."
-            )
-            return FAILURE
-
-        with open(args.config, "rb") as input_stream:
-            toml_data = tomllib.load(input_stream)
-            try:
-                config = Config.from_dict(toml_data)
-            except ValueError:
-                logging.error("Failed to load configration file. See error(s) above.")
-                return FAILURE
-
-        env = j2.Environment(
-            loader=j2.PackageLoader("cbpickaxe_scripts"),
-            autoescape=j2.select_autoescape(),
-        )
-        monster_form_template = env.get_template("monster_form.html")
-        move_template = env.get_template("move.html")
-        index_template = env.get_template("index.html")
-
-        if config.output_directory.exists():
-            shutil.rmtree(config.output_directory)
-        config.output_directory.mkdir()
-
-        hoylake = cbp.Hoylake(default_locale=args.locale)
-        for name, root in config.roots.items():
-            hoylake.load_root(name, pathlib.Path(root))
-
-        monster_forms = load_monster_forms(config, hoylake)
-        moves = load_moves(config, hoylake)
-
-        roots = generate_index_page(
-            config, hoylake, index_template, monster_forms, moves
-        )
-        generate_monster_form_pages(
-            config, hoylake, monster_form_template, monster_forms, roots
-        )
-        generate_move_pages(config, hoylake, move_template, moves, roots)
-
-        return SUCCESS
+        return build_documentation(pathlib.Path(args.config), args.locale)
     else:
         logging.error(f"Unrecognized command: {args.command}")
         return False
+
+
+def build_documentation(config_filepath: pathlib.Path, locale: str) -> int:
+    if not pathlib.Path(config_filepath).exists():
+        logging.error(
+            f"Could not find documentation configuration file: {config_filepath}"
+        )
+        logging.error(
+            "If you do not already have one, you should run `cbpickaxe_generate_docs new` to create one."
+        )
+        return FAILURE
+
+    with open(config_filepath, "rb") as input_stream:
+        toml_data = tomllib.load(input_stream)
+        try:
+            config = Config.from_dict(toml_data)
+        except ValueError:
+            logging.error("Failed to load configration file. See error(s) above.")
+            return FAILURE
+
+    env = j2.Environment(
+        loader=j2.PackageLoader("cbpickaxe_scripts"),
+        autoescape=j2.select_autoescape(),
+    )
+    monster_form_template = env.get_template("monster_form.html")
+    move_template = env.get_template("move.html")
+    index_template = env.get_template("index.html")
+
+    if config.output_directory.exists():
+        shutil.rmtree(config.output_directory)
+    config.output_directory.mkdir()
+
+    hoylake = cbp.Hoylake(default_locale=locale)
+    for name, root in config.roots.items():
+        hoylake.load_root(name, pathlib.Path(root))
+
+    monster_forms = load_monster_forms(config, hoylake)
+    moves = load_moves(config, hoylake)
+
+    roots = generate_index_page(config, hoylake, index_template, monster_forms, moves)
+    generate_monster_form_pages(
+        config, hoylake, monster_form_template, monster_forms, roots
+    )
+    generate_move_pages(config, hoylake, move_template, moves, roots)
+
+    return SUCCESS
 
 
 def create_new_config(config_filepath: pathlib.Path) -> int:
