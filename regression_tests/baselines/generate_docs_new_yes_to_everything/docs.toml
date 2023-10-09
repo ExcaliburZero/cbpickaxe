@@ -1,0 +1,16 @@
+output_directory = "docs"
+
+[roots]
+Cassette Beasts = "../my_cassette_beasts"
+Traffikrabdos = "."
+
+[monsters]
+paths = [
+   "res://mods/my_mod/my_monsters/" # TODO: replace with the 'res://...' path to the folder where you keep the monster_form ".tres" files
+]
+
+[moves]
+paths = [
+   "res://mods/my_mod/my_moves/" # TODO: replace with the 'res://...' path to the folder where you keep the move ".tres" files
+]
+
