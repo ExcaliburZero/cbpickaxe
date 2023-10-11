@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,missing-class-docstring
 from dataclasses import dataclass
-from typing import Any, cast, Dict, IO, List, Tuple
+from typing import Any, cast, Dict, IO, List, Optional, Tuple
 
 import argparse
 import logging
@@ -102,6 +102,10 @@ class Config:
     @property
     def moves_dir(self) -> pathlib.Path:
         return self.output_directory / "moves"
+
+    @property
+    def items_dir(self) -> pathlib.Path:
+        return self.output_directory / "items"
 
     @staticmethod
     def from_dict(d: Dict[str, Any]) -> "Config":
@@ -214,6 +218,8 @@ def build_documentation(config_filepath: pathlib.Path, locale: str) -> int:
     moves = load_moves(config, hoylake)
     items = load_items(config, hoylake)
 
+    copy_item_images(config, hoylake, items)
+
     roots = generate_index_page(
         config, hoylake, index_template, monster_forms, moves, items
     )
@@ -288,6 +294,28 @@ def create_new_config(config_filepath: pathlib.Path) -> int:
     )
 
     return SUCCESS
+
+
+def copy_item_images(
+    config: Config, hoylake: cbp.Hoylake, items: Dict[str, Tuple[str, cbp.Item]]
+) -> None:
+    for _, (root_name, item) in items.items():
+        if not config.items.include_official and root_name == OFFICIAL_ROOT_NAME:
+            continue
+
+        config.items_dir.mkdir(exist_ok=True)
+
+        item_icons_dir = config.items_dir / "icons"
+        item_icons_dir.mkdir(exist_ok=True)
+
+        for _, (_, item) in items.items():
+            if item.icon is None:
+                continue
+
+            source_path = hoylake.lookup_filepath(item.icon)
+            dest_path = item_icons_dir / source_path.name
+
+            shutil.copy(source_path, dest_path)
 
 
 def load_monster_forms(
@@ -788,6 +816,8 @@ def create_index_page(
                             [
                                 {
                                     "name": hoylake.translate(item.name),
+                                    "category": item.category,
+                                    "icon": get_item_icon_path(config, hoylake, item),
                                 }
                                 for _, item in root_items
                             ],
@@ -810,6 +840,19 @@ def create_index_page(
     )
 
     return list_of_roots
+
+
+def get_item_icon_path(
+    config: Config, hoylake: cbp.Hoylake, item: cbp.Item
+) -> Optional[pathlib.Path]:
+    if item.icon is None:
+        return None
+
+    return special_relative_to(
+        config.output_directory,
+        config.items_dir / "icons" / hoylake.lookup_filepath(item.icon).name,
+        config.output_directory,
+    )
 
 
 def get_idle_frame(

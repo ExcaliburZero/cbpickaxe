@@ -11,13 +11,18 @@
     <table class="table" data-toggle="table">
       <thead>
         <tr>
+          <th style="white-space: nowrap; width: 32px;" scope="col" data-sortable="true">Icon</th>
           <th style="white-space: nowrap;" scope="col" data-sortable="true">Name</th>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Category</th>
         </tr>
       </thead>
       <tbody>
         {% for item in root.items_o %}
         <tr>
+          <td style="white-space: nowrap; text-align: center; width: 32px;"><a href="{{ item.link }}"><img
+                src="{{ item.icon }}"></img></a></td>
           <td style="white-space: nowrap;"><a href="{{ item.link }}">{{ item.name }}</a></td>
+          <td style="white-space: nowrap;">{{ item.category }}</td>
         </tr>
         {% endfor %}
       </tbody>
