@@ -9,6 +9,7 @@ import logging
 import pathlib
 
 from .animation import Animation
+from .item import Item
 from .monster_form import MonsterForm
 from .move import Move
 from .translation_table import TranslationTable
@@ -33,6 +34,7 @@ class Hoylake:
         self.__monster_forms: Dict[RelativeResPath, Tuple[RootName, MonsterForm]] = {}
         self.__moves: Dict[RelativeResPath, Tuple[RootName, Move]] = {}
         self.__animations: Dict[RelativeResPath, Tuple[RootName, Animation]] = {}
+        self.__items: Dict[RelativeResPath, Tuple[RootName, Item]] = {}
 
         self.__moves_to_ignore = ["res://data/battle_moves/placeholder.tres"]
 
@@ -211,6 +213,67 @@ class Hoylake:
                         self.__moves[move_relative_path] = (root_name, move)
 
         return moves
+
+    def load_item(self, path: str) -> Tuple[RootName, Item]:
+        """
+        Loads in the item at the given res:// filepath.
+
+        Must have loaded at least one root before running.
+
+        If there is no item file at that location in any of the loaded root directories, then a
+        ValueError will be raised.
+        """
+        self.__check_if_root_loaded()
+
+        relative_path = Hoylake.__parse_res_path(path)
+
+        if relative_path in self.__moves:
+            return self.__items[relative_path]
+
+        for root_name, root in self.__roots.items():
+            item_path = root / relative_path
+            if item_path.exists():
+                with open(item_path, "r", encoding="utf-8") as input_stream:
+                    item = Item.from_tres(input_stream)
+                    self.__items[relative_path] = (root_name, item)
+
+                    return (root_name, item)
+
+        raise ValueError(f"Could not find monster file at path: {path}")
+
+    def load_items(self, path: str) -> Dict[str, Tuple[RootName, Item]]:
+        """
+        Loads in all of the items within the given res:// directory path.
+
+        Looks for that path in all of the loaded root directories.
+
+        Must have loaded at least one root before running.
+        """
+        self.__check_if_root_loaded()
+
+        relative_path = Hoylake.__parse_res_path(path)
+
+        items: Dict[str, Tuple[RootName, Item]] = {}
+        for root_name, root in self.__roots.items():
+            items_dir_path = root / relative_path
+            if items_dir_path.exists():
+                item_paths = sorted(items_dir_path.glob("*.tres"))
+                for item_path in item_paths:
+                    item_relative_path = relative_path / item_path.name
+
+                    if item_relative_path in self.__moves:
+                        items[f"res://{item_relative_path}"] = self.__items[
+                            item_relative_path
+                        ]
+                        continue
+
+                    with open(item_path, "r", encoding="utf-8") as input_stream:
+                        item = Item.from_tres(input_stream)
+
+                        items[f"res://{item_relative_path}"] = (root_name, item)
+                        self.__items[item_relative_path] = (root_name, item)
+
+        return items
 
     def lookup_filepath(self, path: str) -> pathlib.Path:
         """

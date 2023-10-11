@@ -5,6 +5,25 @@
   <div class="row justify-content-center mt-4" style="text-align: center;">
     <h2 id="{{ root.name }}">{{ root.name }}</h2>
   </div>
+  {% if root.items_o|length > 0 %}
+  <div class="row table-responsive">
+    <h3 id="{{ root.name }}_items">Items</h3>
+    <table class="table" data-toggle="table">
+      <thead>
+        <tr>
+          <th style="white-space: nowrap;" scope="col" data-sortable="true">Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in root.items_o %}
+        <tr>
+          <td style="white-space: nowrap;"><a href="{{ item.link }}">{{ item.name }}</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
   {% if root.monsters|length > 0 %}
   <div class="row table-responsive">
     <h3 id="{{ root.name }}_monsters">Monsters</h3>

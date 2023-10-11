@@ -28,6 +28,7 @@ OFFICIAL_MONSTER_FORM_PATHS = [
     "res://data/monster_forms_secret/",
 ]
 OFFICIAL_MOVE_PATHS = ["res://data/battle_moves/"]
+OFFICIAL_ITEMS_PATHS = ["res://data/items/"]
 
 
 @dataclass
@@ -69,11 +70,30 @@ class Moves:
 
 
 @dataclass
+class Items:
+    paths: List[str]
+    include_official: bool
+
+    @staticmethod
+    def from_dict(d: Dict[Any, Any]) -> "Items":
+        paths = d.get("paths", [])
+        include_official = d.get("include_official", False)
+
+        assert isinstance(paths, list)
+        for p in paths:
+            assert isinstance(p, str)
+        paths = cast(List[str], paths)
+
+        return Items(paths=paths, include_official=include_official)
+
+
+@dataclass
 class Config:
     output_directory: pathlib.Path
     roots: Dict[str, pathlib.Path]
     monster_forms: MonsterForms
     moves: Moves
+    items: Items
 
     @property
     def monster_forms_dir(self) -> pathlib.Path:
@@ -89,6 +109,7 @@ class Config:
         roots = d["roots"]
         monster_forms_entry = d.get("monster_forms", {})
         moves_entry = d.get("moves", {})
+        items_entry = d.get("items", {})
 
         assert isinstance(output_directory, str)
 
@@ -100,6 +121,7 @@ class Config:
 
         assert isinstance(monster_forms_entry, dict)
         assert isinstance(moves_entry, dict)
+        assert isinstance(items_entry, dict)
 
         if OFFICIAL_ROOT_NAME not in roots:
             logging.error(f'roots must contain "{OFFICIAL_ROOT_NAME}"')
@@ -107,12 +129,14 @@ class Config:
 
         monster_forms = MonsterForms.from_dict(monster_forms_entry)
         moves = Moves.from_dict(moves_entry)
+        items = Items.from_dict(items_entry)
 
         return Config(
             output_directory=pathlib.Path(output_directory),
             roots={key: pathlib.Path(value) for key, value in roots.items()},
             monster_forms=monster_forms,
             moves=moves,
+            items=items,
         )
 
 
@@ -121,6 +145,7 @@ class Root:
     name: str
     has_moves: bool
     has_monsters: bool
+    has_items: bool
 
 
 def main(argv: List[str]) -> int:
@@ -187,12 +212,16 @@ def build_documentation(config_filepath: pathlib.Path, locale: str) -> int:
 
     monster_forms = load_monster_forms(config, hoylake)
     moves = load_moves(config, hoylake)
+    items = load_items(config, hoylake)
 
-    roots = generate_index_page(config, hoylake, index_template, monster_forms, moves)
+    roots = generate_index_page(
+        config, hoylake, index_template, monster_forms, moves, items
+    )
     generate_monster_form_pages(
         config, hoylake, monster_form_template, monster_forms, roots
     )
     generate_move_pages(config, hoylake, move_template, moves, roots)
+    # TODO: generate item pages
 
     return SUCCESS
 
@@ -285,17 +314,29 @@ def load_moves(config: Config, hoylake: cbp.Hoylake) -> Dict[str, Tuple[str, cbp
     return moves
 
 
+def load_items(config: Config, hoylake: cbp.Hoylake) -> Dict[str, Tuple[str, cbp.Item]]:
+    items = {}
+    for items_path in OFFICIAL_ITEMS_PATHS + config.items.paths:
+        if items_path.endswith(".tres"):
+            items[items_path] = hoylake.load_item(items_path)
+        else:
+            items.update(hoylake.load_items(items_path))
+
+    return items
+
+
 def generate_index_page(
     config: Config,
     hoylake: cbp.Hoylake,
     template: j2.Template,
     monster_forms: Dict[str, Tuple[str, cbp.MonsterForm]],
     moves: Dict[str, Tuple[str, cbp.Move]],
+    items: Dict[str, Tuple[str, cbp.Item]],
 ) -> List[Root]:
     index_filepath = config.output_directory / "index.html"
     with open(index_filepath, "w", encoding="utf-8") as output_stream:
         return create_index_page(
-            config, hoylake, template, monster_forms, moves, output_stream
+            config, hoylake, template, monster_forms, moves, items, output_stream
         )
 
 
@@ -610,12 +651,17 @@ def create_index_page(
     template: j2.Template,
     monster_forms: Dict[str, Tuple[str, cbp.MonsterForm]],
     moves: Dict[str, Tuple[str, cbp.Move]],
+    items: Dict[str, Tuple[str, cbp.Item]],
     output_stream: IO[str],
 ) -> List[Root]:
     roots = {root for _, (root, _) in monster_forms.items()} | {
         root for _, (root, _) in moves.items()
     }
-    if not config.monster_forms.include_official and not config.moves.include_official:
+    if (
+        not config.monster_forms.include_official
+        and not config.moves.include_official
+        and not config.items.include_official
+    ):
         roots.discard(OFFICIAL_ROOT_NAME)
 
     data_by_root = {
@@ -641,6 +687,15 @@ def create_index_page(
                 if move_root == root
                 and (config.moves.include_official or move_root != OFFICIAL_ROOT_NAME)
             ],
+            [
+                (item_path, item_form)
+                for item_path, (
+                    item_root,
+                    item_form,
+                ) in items.items()
+                if item_root == root
+                and (config.items.include_official or item_root != OFFICIAL_ROOT_NAME)
+            ],
         )
         for root in roots
     }
@@ -650,8 +705,9 @@ def create_index_page(
             name=root_name,
             has_monsters=len(root_monsters) > 0,
             has_moves=len(root_moves) > 0,
+            has_items=len(root_items) > 0,
         )
-        for root_name, (root_monsters, root_moves) in data_by_root.items()
+        for root_name, (root_monsters, root_moves, root_items) in data_by_root.items()
     ]
 
     current_dir = config.output_directory
@@ -728,8 +784,25 @@ def create_index_page(
                                 ],  # cast needed to avoid a mypy type inference bug
                             ),
                         ),
+                        "items_o": sorted(  # Note: extra "_o" is to avoid conflicting with the "items()" method
+                            [
+                                {
+                                    "name": hoylake.translate(item.name),
+                                }
+                                for _, item in root_items
+                            ],
+                            key=lambda d: (
+                                cast(Dict[str, Any], d)[
+                                    "name"
+                                ],  # cast needed to avoid a mypy type inference bug
+                            ),
+                        ),
                     }
-                    for root, (root_monster_forms, root_moves) in data_by_root.items()
+                    for root, (
+                        root_monster_forms,
+                        root_moves,
+                        root_items,
+                    ) in data_by_root.items()
                 ],
                 key=lambda d: (d["name"] == OFFICIAL_ROOT_NAME, d["name"]),
             ),
