@@ -601,6 +601,7 @@ def create_monster_form_page(
                         "name": root.name,
                         "monsters": [True] if root.has_monsters else [],
                         "moves": [True] if root.has_moves else [],
+                        "items_o": [True] if root.has_items else [],
                         "root_link": str(
                             special_relative_to(
                                 config.monster_forms_dir,
@@ -684,6 +685,7 @@ def create_move_page(
                         "name": root.name,
                         "monsters": [True] if root.has_monsters else [],
                         "moves": [True] if root.has_moves else [],
+                        "items_o": [True] if root.has_items else [],
                         "root_link": str(
                             special_relative_to(
                                 config.moves_dir,
@@ -741,6 +743,7 @@ def create_item_page(
                         "name": root.name,
                         "monsters": [True] if root.has_monsters else [],
                         "moves": [True] if root.has_moves else [],
+                        "items_o": [True] if root.has_items else [],
                         "root_link": str(
                             special_relative_to(
                                 config.moves_dir,

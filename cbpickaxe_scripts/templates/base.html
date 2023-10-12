@@ -94,6 +94,12 @@
           <div class="list-unstyled border-0 p-2 sidebar-root" style="cursor: pointer;"
             onclick="window.location='{{ root.root_link }}'"><a href="{{ root.root_link }}" class="sidebar-root-link">{{
               root.name }}</a></div>
+          {% if root.items_o|length > 0 %}
+          <div class="list-unstyled border-0 p-2 sidebar-sub" style="cursor: pointer;"
+            onclick="window.location='{{ root.root_link }}_items'"><a href="{{ root.root_link }}_items"
+              class="sidebar-sub-link">Items</a>
+          </div>
+          {% endif %}
           {% if root.moves|length > 0 %}
           <div class="list-unstyled border-0 p-2 sidebar-sub" style="cursor: pointer;"
             onclick="window.location='{{ root.root_link }}_moves'"><a href="{{ root.root_link }}_moves"
