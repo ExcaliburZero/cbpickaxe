@@ -906,6 +906,12 @@ def create_index_page(
                                     "name": hoylake.translate(item.name),
                                     "category": item.category,
                                     "icon": get_item_icon_path(config, hoylake, item),
+                                    "link": special_relative_to(
+                                        config.output_directory,
+                                        config.items_dir
+                                        / (hoylake.translate(item.name) + ".html"),
+                                        config.output_directory,
+                                    ),
                                 }
                                 for _, item in root_items
                             ],
