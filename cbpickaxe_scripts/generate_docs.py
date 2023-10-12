@@ -717,7 +717,8 @@ def create_item_page(
         template.render(
             title=hoylake.translate(item.name),
             name=hoylake.translate(item.name),
-            # description=hoylake.translate(item.description),
+            description=hoylake.translate(item.description),
+            category=item.category,
             item_root=item_root,
             item_root_link=str(
                 special_relative_to(

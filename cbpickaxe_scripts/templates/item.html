@@ -14,16 +14,17 @@
 <div class="container">
   <div class="row justify-content-center mt-4" style="text-align: center;">
     <h1>{{ name }}</h1>
+    <p>{{ category }}</p>
   </div>
   {% if icon != "" %}
-  <div class="row justify-content-center mt-4">
+  <div class="row justify-content-center">
     <img src="{{ icon }}" alt="Sprite of {{ name }}"
       style="image-rendering: pixelated; width: 32px; height: 32px; display: block; margin-left: auto; margin-right: auto; padding: 0px;">
   </div>
   {% endif %}
   <div class="row">
     <h2>Description</h2>
-    <p></p>
+    <p>{{ description }}</p>
   </div>
 </div>
 {% endblock %}

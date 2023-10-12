@@ -14,6 +14,7 @@ class Item:
     """
 
     name: str
+    description: str
     category: str
     icon: Optional[str]
 
@@ -25,6 +26,7 @@ class Item:
         scene = gp.parse(input_stream.read())
 
         name = None
+        description = None
         category = None
         icon = None
 
@@ -32,15 +34,18 @@ class Item:
             # pylint: disable-next=unidiomatic-typecheck
             if type(section) == gp.GDResourceSection:
                 name = section["name"]
+                description = section["description"]
                 category = section["category"]
                 icon = Item.__parse_icon(scene, section)
 
         assert isinstance(name, str)
+        assert isinstance(description, str)
         assert isinstance(category, str)
         assert isinstance(icon, str) or icon is None
 
         return Item(
             name=name,
+            description=description,
             category=category,
             icon=icon,
         )
