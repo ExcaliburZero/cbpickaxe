@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block navbar %}
+<div class="row mt-4 navbar">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ item_root_link }}">{{ item_root }}</a></li>
+      <li class="breadcrumb-item"><a href="{{ item_root_link }}_items">Items</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ name }}</li>
+    </ol>
+  </nav>
+</div>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center mt-4" style="text-align: center;">
+    <h1>{{ name }}</h1>
+  </div>
+  {% if icon != "" %}
+  <div class="row justify-content-center mt-4">
+    <img src="{{ icon }}" alt="Sprite of {{ name }}"
+      style="image-rendering: pixelated; width: 32px; height: 32px; display: block; margin-left: auto; margin-right: auto; padding: 0px;">
+  </div>
+  {% endif %}
+  <div class="row">
+    <h2>Description</h2>
+    <p></p>
+  </div>
+</div>
+{% endblock %}

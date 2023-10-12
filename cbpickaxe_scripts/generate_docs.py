@@ -204,6 +204,7 @@ def build_documentation(config_filepath: pathlib.Path, locale: str) -> int:
     )
     monster_form_template = env.get_template("monster_form.html")
     move_template = env.get_template("move.html")
+    item_template = env.get_template("item.html")
     index_template = env.get_template("index.html")
 
     if config.output_directory.exists():
@@ -227,7 +228,7 @@ def build_documentation(config_filepath: pathlib.Path, locale: str) -> int:
         config, hoylake, monster_form_template, monster_forms, roots
     )
     generate_move_pages(config, hoylake, move_template, moves, roots)
-    # TODO: generate item pages
+    generate_item_pages(config, hoylake, item_template, items, roots)
 
     return SUCCESS
 
@@ -427,6 +428,33 @@ def generate_move_pages(
                 move,
                 hoylake,
                 move_template,
+                roots,
+                output_stream,
+            )
+
+
+def generate_item_pages(
+    config: Config,
+    hoylake: cbp.Hoylake,
+    item_template: j2.Template,
+    items: Dict[str, Tuple[str, cbp.Item]],
+    roots: List[Root],
+) -> None:
+    for item_path, (root_name, item) in items.items():
+        if not config.items.include_official and root_name == OFFICIAL_ROOT_NAME:
+            continue
+
+        config.items_dir.mkdir(exist_ok=True)
+
+        item_page_filepath = config.items_dir / (hoylake.translate(item.name) + ".html")
+        with open(item_page_filepath, "w", encoding="utf-8") as output_stream:
+            create_item_page(
+                config,
+                item_path,
+                root_name,
+                item,
+                hoylake,
+                item_template,
                 roots,
                 output_stream,
             )
@@ -650,6 +678,62 @@ def create_move_page(
                 ],
                 key=lambda d: (d["bestiary_index_raw"], d["name"]),
             ),
+            roots=sorted(
+                [
+                    {
+                        "name": root.name,
+                        "monsters": [True] if root.has_monsters else [],
+                        "moves": [True] if root.has_moves else [],
+                        "root_link": str(
+                            special_relative_to(
+                                config.moves_dir,
+                                config.output_directory / "index.html",
+                                config.output_directory,
+                            )
+                        )
+                        + f"#{root.name}",
+                    }
+                    for root in roots
+                ],
+                key=lambda d: (d["name"] == OFFICIAL_ROOT_NAME, d["name"]),
+            ),
+        )
+    )
+
+
+def create_item_page(
+    config: Config,
+    _path: str,
+    item_root: str,
+    item: cbp.Item,
+    hoylake: cbp.Hoylake,
+    template: j2.Template,
+    roots: List[Root],
+    output_stream: IO[str],
+) -> None:
+    icon_path = get_item_icon_path(config, hoylake, item)
+
+    output_stream.write(
+        template.render(
+            title=hoylake.translate(item.name),
+            name=hoylake.translate(item.name),
+            # description=hoylake.translate(item.description),
+            item_root=item_root,
+            item_root_link=str(
+                special_relative_to(
+                    config.items_dir,
+                    config.output_directory / "index.html",
+                    config.output_directory,
+                )
+            )
+            + f"#{item_root}",
+            icon=special_relative_to(
+                config.items_dir,
+                config.output_directory / icon_path,
+                config.items_dir,
+            )
+            if icon_path is not None
+            else "",
             roots=sorted(
                 [
                     {
