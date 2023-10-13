@@ -770,9 +770,11 @@ def create_index_page(
     items: Dict[str, Tuple[str, cbp.Item]],
     output_stream: IO[str],
 ) -> List[Root]:
-    roots = {root for _, (root, _) in monster_forms.items()} | {
-        root for _, (root, _) in moves.items()
-    }
+    roots = (
+        {root for _, (root, _) in monster_forms.items()}
+        | {root for _, (root, _) in moves.items()}
+        | {root for _, (root, _) in items.items()}
+    )
     if (
         not config.monster_forms.include_official
         and not config.moves.include_official
