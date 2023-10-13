@@ -4,7 +4,7 @@ output_directory = "docs"
 cassette_beasts = "../my_cassette_beasts"
 Traffikrabdos = "."
 
-[monsters]
+[monster_forms]
 paths = [
    "res://mods/my_mod/my_monsters/" # TODO: replace with the 'res://...' path to the folder where you keep the monster_form ".tres" files
 ]
