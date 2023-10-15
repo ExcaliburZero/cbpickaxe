@@ -158,7 +158,7 @@ class Animation:
             for _ in range(0, pc):
                 name = get_string(input_stream, header.endian, header.string_map)
                 print(name)
-                variant = read_variant(input_stream, header.endian)
+                variant = read_variant(input_stream, header.endian, header.string_map)
                 print(variant)
 
                 properties.append((name, variant))

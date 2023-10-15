@@ -96,7 +96,7 @@ class TranslationTable:
             properties: List[Tuple[str, PropertyValue]] = []
             for _ in range(0, pc):
                 name = get_string(input_stream, header.endian, header.string_map)
-                variant = read_variant(input_stream, header.endian)
+                variant = read_variant(input_stream, header.endian, header.string_map)
 
                 properties.append((name, variant))
 

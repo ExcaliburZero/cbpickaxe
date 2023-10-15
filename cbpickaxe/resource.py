@@ -7,6 +7,11 @@ from typing import IO, List, Literal, Tuple, Union
 import enum
 import struct
 
+OBJECT_EMPTY = 0
+OBJECT_EXTERNAL_RESOURCE = 1
+OBJECT_INTERNAL_RESOURCE = 2
+OBJECT_EXTERNAL_RESOURCE_INDEX = 3
+
 
 @dataclass(frozen=True)
 class ResourceHeader:
@@ -85,7 +90,43 @@ class ResourceHeader:
         )
 
 
-PropertyValue = Union[List[bytes], List[int], str, bool, int, float]
+@dataclass(frozen=True)
+class ExternalResourceIndex:
+    index: int
+
+
+@dataclass(frozen=True)
+class NodePath:
+    name_parts: List[str]
+    sub_name_parts: List[str]
+
+
+@dataclass
+class Vector2:
+    x: float
+    y: float
+
+
+@dataclass
+class Rect2:
+    position: Vector2
+    size: Vector2
+
+
+PropertyValue = Union[
+    List[bytes],
+    List[int],
+    List[float],
+    str,
+    bool,
+    int,
+    float,
+    None,
+    ExternalResourceIndex,
+    NodePath,
+    List["PropertyValue"],
+    Rect2,
+]
 
 
 class VariantBin(enum.Enum):
@@ -160,13 +201,25 @@ def get_string(
     case the string is indexed into the map.
     """
     index = int.from_bytes(input_stream.read(4), endian)
-    assert index < len(string_map), "Not yet supported"
+    if index & 0x80000000:
+        # TODO: confirm this works
+        length = index & 0x7FFFFFFF
+        if length == 0:
+            return ""
+
+        prev_location = input_stream.tell()
+        string = read_unicode_string(input_stream, endian)
+        input_stream.seek(prev_location)
+
+        return string
 
     return string_map[index]
 
 
 def read_variant(
-    input_stream: IO[bytes], endian: Literal["big", "little"]
+    input_stream: IO[bytes],
+    endian: Literal["big", "little"],
+    string_map: List[str],
 ) -> PropertyValue:
     """
     Reads in a "variant" value from the given input stream.
@@ -186,6 +239,52 @@ def read_variant(
         return value
     elif v == VariantBin.VARIANT_STRING:
         return read_unicode_string(input_stream, endian)
+    elif v == VariantBin.VARIANT_RECT2:
+        position_x = struct.unpack("f", input_stream.read(4))[0]
+        position_y = struct.unpack("f", input_stream.read(4))[0]
+        size_x = struct.unpack("f", input_stream.read(4))[0]
+        size_y = struct.unpack("f", input_stream.read(4))[0]
+
+        return Rect2(Vector2(position_x, position_y), Vector2(size_x, size_y))
+    elif v == VariantBin.VARIANT_NODE_PATH:
+        name_count = int.from_bytes(input_stream.read(2), endian)
+        snc = int.from_bytes(input_stream.read(2), endian)
+
+        is_absolute = snc >= 0x8000
+        assert not is_absolute, "Not yet supported"
+
+        name_parts = []
+        for _ in range(0, name_count):
+            name_parts.append(get_string(input_stream, endian, string_map))
+
+        sub_name_parts = []
+        for _ in range(0, snc):
+            sub_name_parts.append(get_string(input_stream, endian, string_map))
+
+        return NodePath(name_parts, sub_name_parts)
+    elif v == VariantBin.VARIANT_OBJECT:
+        kind = int.from_bytes(input_stream.read(4), endian)
+        if kind == OBJECT_EMPTY:
+            return None
+        elif kind == OBJECT_EXTERNAL_RESOURCE_INDEX:
+            index = int.from_bytes(input_stream.read(4), endian)
+            return ExternalResourceIndex(index)
+
+        raise NotImplementedError(f"t={t} kind={kind}")
+    elif v == VariantBin.VARIANT_DICTIONARY:
+        size = int.from_bytes(input_stream.read(4), endian)
+
+        print("size:", size)
+
+        data = {}
+        for _ in range(0, size):
+            key = read_variant(input_stream, endian, string_map)
+            print("  key:", key)
+            key_value = read_variant(input_stream, endian, string_map)
+            print("  key_value:", key_value)
+            data[key] = key_value
+
+        raise NotImplementedError(f"t={t}")
     elif v == VariantBin.VARIANT_RAW_ARRAY:
         length = int.from_bytes(input_stream.read(4), endian)
         values_bytes: List[bytes] = [input_stream.read(1) for _ in range(0, length)]
@@ -196,6 +295,13 @@ def read_variant(
                 input_stream.read(1)
 
         return values_bytes
+    elif v == VariantBin.VARIANT_ARRAY:
+        length = int.from_bytes(input_stream.read(4), endian)
+        values: List[PropertyValue] = [
+            read_variant(input_stream, endian, string_map) for _ in range(0, length)
+        ]
+
+        return values
     elif v == VariantBin.VARIANT_INT32_ARRAY:
         length = int.from_bytes(input_stream.read(4), endian)
         values_ints: List[int] = [
@@ -203,6 +309,13 @@ def read_variant(
         ]
 
         return values_ints
+    elif v == VariantBin.VARIANT_REAL_ARRAY:
+        length = int.from_bytes(input_stream.read(4), endian)
+        values_floats: List[float] = [
+            struct.unpack("f", input_stream.read(4))[0] for _ in range(0, length)
+        ]
+
+        return values_floats
     else:
         raise NotImplementedError(f"t={t}")
 
