@@ -2,7 +2,9 @@
 Classes related to sprite animations.
 """
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, IO, List
+
+from .resource import ResourceHeader
 
 
 @dataclass
@@ -124,6 +126,20 @@ class Animation:
         assert isinstance(image, str)
 
         return Animation(frames, frame_tags, image)
+
+    @staticmethod
+    def from_scn(input_stream: IO[bytes]) -> "Animation":
+        """
+        Reads in an Animation from the given Godot scn file input stream.
+        """
+        header = ResourceHeader.from_stream(input_stream)
+        print(header)
+
+        assert len(header.ext_resources) == 1, header.ext_resources
+        image = header.ext_resources[0][1].replace("\x00", "")
+        print(image)
+
+        raise NotImplementedError()
 
     @staticmethod
     def __get_frame_id(frame_name: str) -> int:

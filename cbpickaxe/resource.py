@@ -16,6 +16,7 @@ class ResourceHeader:
     header: str
     endian: Literal["big", "little"]
     string_map: List[str]
+    ext_resources: List[Tuple[str, str]]
     int_resources: List[Tuple[str, int]]
 
     @staticmethod
@@ -55,8 +56,15 @@ class ResourceHeader:
             for _ in range(0, string_table_size)
         ]
 
+        # https://github.com/godotengine/godot/blob/a574c0296b38d5f786f249b12e6251e562c528cc/core/io/resource_format_binary.cpp#L1040
         ext_resources_size = int.from_bytes(input_stream.read(4), endian)
-        assert ext_resources_size == 0
+        ext_resources = [
+            (
+                read_unicode_string(input_stream, endian),
+                read_unicode_string(input_stream, endian),
+            )
+            for _ in range(0, ext_resources_size)
+        ]
 
         int_resources_size = int.from_bytes(input_stream.read(4), endian)
         int_resources = [
@@ -71,6 +79,7 @@ class ResourceHeader:
             header=header,
             endian=endian,
             string_map=string_map,
+            ext_resources=ext_resources,
             int_resources=int_resources,
         )
 
