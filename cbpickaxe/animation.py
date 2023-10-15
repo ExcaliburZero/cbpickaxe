@@ -2,9 +2,15 @@
 Classes related to sprite animations.
 """
 from dataclasses import dataclass
-from typing import Any, Dict, IO, List
+from typing import Any, Dict, IO, List, Tuple
 
-from .resource import ResourceHeader
+from .resource import (
+    ResourceHeader,
+    read_unicode_string,
+    read_variant,
+    get_string,
+    PropertyValue,
+)
 
 
 @dataclass
@@ -138,6 +144,30 @@ class Animation:
         assert len(header.ext_resources) == 1, header.ext_resources
         image = header.ext_resources[0][1].replace("\x00", "")
         print(image)
+
+        for i, (_, offset) in enumerate(header.int_resources):
+            _main = i == (len(header.int_resources) - 1)
+            # assert main
+
+            input_stream.seek(offset)
+            _rtype = read_unicode_string(input_stream, header.endian)
+
+            pc = int.from_bytes(input_stream.read(4), header.endian)
+
+            properties: List[Tuple[str, PropertyValue]] = []
+            for _ in range(0, pc):
+                name = get_string(input_stream, header.endian, header.string_map)
+                print(name)
+                variant = read_variant(input_stream, header.endian)
+                print(variant)
+
+                properties.append((name, variant))
+
+            properties_by_name = {
+                prop[0].rstrip("\x00"): prop[1] for prop in properties
+            }
+
+            print(properties_by_name)
 
         raise NotImplementedError()
 

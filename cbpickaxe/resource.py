@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import IO, List, Literal, Tuple, Union
 
 import enum
+import struct
 
 
 @dataclass(frozen=True)
@@ -84,7 +85,7 @@ class ResourceHeader:
         )
 
 
-PropertyValue = Union[List[bytes], List[int], str]
+PropertyValue = Union[List[bytes], List[int], str, bool, int, float]
 
 
 class VariantBin(enum.Enum):
@@ -173,7 +174,17 @@ def read_variant(
     t = int.from_bytes(input_stream.read(4), endian)
 
     v = VariantBin(t)
-    if v == VariantBin.VARIANT_STRING:
+    if v == VariantBin.VARIANT_BOOL:
+        value = int.from_bytes(input_stream.read(4), endian)
+        return value == 0
+    elif v == VariantBin.VARIANT_INT:
+        return int.from_bytes(input_stream.read(4), endian)
+    elif v == VariantBin.VARIANT_REAL:
+        value = struct.unpack("f", input_stream.read(4))[0]
+        assert isinstance(value, float)
+
+        return value
+    elif v == VariantBin.VARIANT_STRING:
         return read_unicode_string(input_stream, endian)
     elif v == VariantBin.VARIANT_RAW_ARRAY:
         length = int.from_bytes(input_stream.read(4), endian)

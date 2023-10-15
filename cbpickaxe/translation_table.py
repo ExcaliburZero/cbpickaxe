@@ -65,8 +65,8 @@ class TranslationTable:
 
     def __init__(
         self,
-        hashes: PropertyValue,
-        buckets: PropertyValue,
+        hashes: List[int],
+        buckets: List[int],
         strings: List[bytes],
     ) -> None:
         self.__hashes = hashes
@@ -112,8 +112,19 @@ class TranslationTable:
             assert isinstance(locale, str)
             locale = locale.replace("\x00", "")
 
+            assert isinstance(strings, list)
             assert isinstance(strings[0], bytes)
             strings = cast(List[bytes], strings)
+
+            assert isinstance(hashes, list)
+            for h in hashes:
+                assert isinstance(h, int)
+            hashes = cast(List[int], hashes)
+
+            assert isinstance(buckets, list)
+            for b in buckets:
+                assert isinstance(b, int)
+            buckets = cast(List[int], buckets)
 
             return TranslationTable(hashes, buckets, strings), locale
 
@@ -141,8 +152,8 @@ class TranslationTable:
 
     @staticmethod
     def __get(
-        hashes: PropertyValue,
-        buckets: PropertyValue,
+        hashes: List[int],
+        buckets: List[int],
         strings: List[bytes],
         string: str,
     ) -> str:
@@ -154,7 +165,6 @@ class TranslationTable:
         if h_hash == 0xFFFFFFFF:
             raise KeyError(string)
 
-        buckets = cast(List[int], buckets)
         bucket_size = buckets[h_hash]
         bucket = TranslationTable._Bucket.from_ints(
             buckets[h_hash : h_hash + 2 + 4 * bucket_size]
