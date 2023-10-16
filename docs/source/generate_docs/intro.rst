@@ -6,3 +6,4 @@ cbpickaxe_generate_docs
    :maxdepth: 2
 
    tutorial
+   config_file
