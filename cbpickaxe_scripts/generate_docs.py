@@ -964,7 +964,13 @@ def get_idle_frame(
         )
         raise
 
-    frame_box = animation.get_frame("idle", 0).box
+    try:
+        frame_box = animation.get_frame("idle", 0).box
+    except KeyError as e:
+        logging.warning(
+            f"Found animation file, but could not find idle animation for: {monster_form.battle_sprite_path}"
+        )
+        raise ValueError() from e
 
     image_filepath_relative = (
         "/".join(monster_form.battle_sprite_path.split("/")[:-1])

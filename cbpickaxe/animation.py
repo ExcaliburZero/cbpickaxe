@@ -2,7 +2,7 @@
 Classes related to sprite animations.
 """
 from dataclasses import dataclass
-from typing import Any, cast, Dict, IO, List, Optional, Tuple
+from typing import Any, cast, Dict, IO, List, Tuple
 
 from .resource import (
     ResourceHeader,
@@ -89,70 +89,6 @@ class FrameTag:
 
 
 @dataclass
-class FrameChain:
-    frames: List[Frame]
-
-    def merge(self, other: "FrameChain") -> bool:
-        overlap = self.get_overlap(other)
-        if overlap is None:
-            return False
-
-        new_frames_order = self.frames
-
-        if overlap[0][0] == 0 and overlap[0][1] != 0:
-            new_frames_order = other.frames[0 : overlap[0][1]] + new_frames_order
-
-        if (
-            overlap[1][0] == len(self.frames) - 1
-            and overlap[1][1] != len(other.frames) - 1
-        ):
-            new_frames_order = new_frames_order + other.frames[overlap[1][1] :]
-
-        return True
-
-    def get_overlap(
-        self, other: "FrameChain"
-    ) -> Optional[Tuple[Tuple[int, int], Tuple[int, int]]]:
-        # Find one overlapping frame to start the search with
-        one_overlap = None
-        for i, frame_a in enumerate(self.frames):
-            for j, frame_b in enumerate(other.frames):
-                if frame_a == frame_b:
-                    one_overlap = (i, j)
-
-        if one_overlap is None:
-            return None
-
-        overlap_start = one_overlap
-        overlap_end = one_overlap
-
-        # Widen out the overlap window backwards
-        while overlap_start[0] >= 1 and overlap_start[1] >= 1:
-            frame_a = self.frames[overlap_start[0] - 1]
-            frame_b = other.frames[overlap_start[1] - 1]
-
-            if frame_a == frame_b:
-                overlap_start = (overlap_start[0] - 1, overlap_start[1] - 1)
-            else:
-                break
-
-        # Widen out the overlap window forwards
-        while (
-            overlap_end[0] < len(self.frames) - 1
-            and overlap_end[1] < len(other.frames) - 1
-        ):
-            frame_a = self.frames[overlap_end[0] + 1]
-            frame_b = other.frames[overlap_end[1] + 1]
-
-            if frame_a == frame_b:
-                overlap_end = (overlap_end[0] + 1, overlap_end[1] + 1)
-            else:
-                break
-
-        return overlap_start, overlap_end
-
-
-@dataclass
 class Animation:
     """
     An animated sprite consisting of a set of frames with several tags indicating types of
@@ -207,7 +143,7 @@ class Animation:
         header = ResourceHeader.from_stream(input_stream)
 
         assert len(header.ext_resources) == 1, header.ext_resources
-        image = header.ext_resources[0][1].replace("\x00", "")
+        image = header.ext_resources[0][1].replace("\x00", "").split("/")[-1]
 
         sections = []
         main_section_ = None
@@ -286,7 +222,7 @@ class Animation:
 
                     animation_frames.append(frame)
 
-                animations[animation_name] = animation_frames
+                animations[animation_name.replace("anims/", "")] = animation_frames
 
         frames, frame_tags = Animation.__reconstruct_frames_info(animations)
 
@@ -296,47 +232,16 @@ class Animation:
     def __reconstruct_frames_info(
         animations: Dict[str, List[Frame]]
     ) -> Tuple[List[Frame], List[FrameTag]]:
-        frame_chains = [FrameChain(frames) for _, frames in animations.items()]
-        any_changes = True
-        while any_changes:
-            any_changes = False
+        # Note: I originally used a more complex scheme where I tried to pack together re-used
+        # frames, but that ran into issues that I was unable to fix.
 
-            i = 0
-            while i < len(frame_chains):
-                j = i + 1
-                while j < len(frame_chains):
-                    a = frame_chains[i]
-                    b = frame_chains[j]
-
-                    if a.merge(b):
-                        del frame_chains[j]
-                        j -= 1
-
-                        any_changes = True
-
-                    j += 1
-
-                i += 1
-
-        frames: List[Frame] = [
-            *[frame for chain in frame_chains for frame in chain.frames]
-        ]
-        assert len(frames) == len(set(frames)), f"{len(frames)} != {len(set(frames))}"
-
-        # Create frame tags
         frame_tags = []
+        frames: List[Frame] = []
         for animation_name, animation_frames in animations.items():
-            start_frame = frames.index(animation_frames[0])
-            end_frame = frames.index(animation_frames[-1])
+            start_frame = len(frames)
+            end_frame = len(frames) + len(animation_frames)
 
-            # Double check that the frame ordering is valid
-            for i, j in zip(
-                range(0, len(animation_frames) - 1), range(1, len(animation_frames))
-            ):
-                assert i == j - 1
-                c = frames.index(animation_frames[i])
-                d = frames.index(animation_frames[j])
-                assert c == d - 1
+            frames += animation_frames
 
             frame_tags.append(FrameTag(animation_name, start_frame, end_frame))
 

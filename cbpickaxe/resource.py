@@ -92,28 +92,48 @@ class ResourceHeader:
 
 @dataclass(frozen=True)
 class ExternalResourceIndex:
+    """
+    An index that references an external resource.
+    """
+
     index: int
 
 
 @dataclass(frozen=True)
 class InternalResourceIndex:
+    """
+    An index that references an internal resource.
+    """
+
     index: int
 
 
 @dataclass(frozen=True)
 class NodePath:
+    """
+    A Godot node path.
+    """
+
     name_parts: List[str]
     sub_name_parts: List[str]
 
 
 @dataclass
 class Vector2:
+    """
+    A 2D vector.
+    """
+
     x: float
     y: float
 
 
 @dataclass
 class Rect2:
+    """
+    A 2D rectangle.
+    """
+
     position: Vector2
     size: Vector2
 
@@ -211,16 +231,18 @@ def get_string(
     """
     index = int.from_bytes(input_stream.read(4), endian)
     if index & 0x80000000:
-        # TODO: confirm this works
-        length = index & 0x7FFFFFFF
-        if length == 0:
-            return ""
+        raise NotImplementedError()
+        # This code below should works, but has not yet been tested. Once we have a case to test
+        # this, we can uncomment it and try it out.
+        # length = index & 0x7FFFFFFF
+        # if length == 0:
+        #    return ""
 
-        prev_location = input_stream.tell()
-        string = read_unicode_string(input_stream, endian)
-        input_stream.seek(prev_location)
+        # prev_location = input_stream.tell()
+        # string = read_unicode_string(input_stream, endian)
+        # input_stream.seek(prev_location)
 
-        return string
+        # return string
 
     return string_map[index]
 

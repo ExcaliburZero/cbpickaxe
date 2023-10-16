@@ -7,6 +7,7 @@ import collections
 import json
 import logging
 import pathlib
+import re
 
 from .animation import Animation
 from .item import Item
@@ -73,9 +74,30 @@ class Hoylake:
 
         for root_name, root in self.__roots.items():
             animation_path = root / relative_path
+            animation_import_path = pathlib.Path(
+                str((root / relative_path)) + ".import"
+            )
             if animation_path.exists():
                 with open(animation_path, "r", encoding="utf-8") as input_stream:
                     animation = Animation.from_dict(json.load(input_stream))
+                    self.__animations[relative_path] = (root_name, animation)
+
+                    return animation
+            elif animation_import_path.exists():
+                # If the original JSON animation file is not available (since it was compiled and
+                # the original was not distributed), then lookup the `.import` version which will
+                # point to the compiled `.scn` version fo the file which we can parse to get out
+                # the information we need.
+                import_path = None
+                with open(animation_import_path, "r", encoding="utf-8") as input_stream:
+                    for line in input_stream:
+                        match = re.match(r'path="(res.+)"', line)
+                        if match is not None:
+                            import_path = match.groups()[0]
+
+                assert import_path is not None
+                with open(self.lookup_filepath(import_path), "rb") as input_stream:
+                    animation = Animation.from_scn(input_stream)
                     self.__animations[relative_path] = (root_name, animation)
 
                     return animation
