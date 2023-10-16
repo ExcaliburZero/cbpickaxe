@@ -23,10 +23,13 @@ def main(argv: List[str]) -> int:
         filepath = pathlib.Path(filepath)
 
         with open(filepath, "rb") as input_stream:
-            animation = cbp.Animation.from_scn(input_stream)
+            try:
+                animation = cbp.Animation.from_scn(input_stream)
+            except Exception as e:
+                raise ValueError(
+                    f"Failed to load/convert animation compiled json: {filepath}"
+                ) from e
             print(animation)
-
-            raise NotImplementedError()
 
     return SUCCESS
 

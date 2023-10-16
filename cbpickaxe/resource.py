@@ -2,7 +2,7 @@
 Classes and methods for parsing Godot resource files.
 """
 from dataclasses import dataclass
-from typing import IO, List, Literal, Tuple, Union
+from typing import Dict, IO, List, Literal, Tuple, Union
 
 import enum
 import struct
@@ -96,6 +96,11 @@ class ExternalResourceIndex:
 
 
 @dataclass(frozen=True)
+class InternalResourceIndex:
+    index: int
+
+
+@dataclass(frozen=True)
 class NodePath:
     name_parts: List[str]
     sub_name_parts: List[str]
@@ -117,15 +122,19 @@ PropertyValue = Union[
     List[bytes],
     List[int],
     List[float],
+    List[str],
     str,
     bool,
     int,
     float,
     None,
     ExternalResourceIndex,
+    InternalResourceIndex,
     NodePath,
     List["PropertyValue"],
+    Vector2,
     Rect2,
+    Dict[str, "PropertyValue"],
 ]
 
 
@@ -239,6 +248,11 @@ def read_variant(
         return value
     elif v == VariantBin.VARIANT_STRING:
         return read_unicode_string(input_stream, endian)
+    elif v == VariantBin.VARIANT_VECTOR2:
+        x = struct.unpack("f", input_stream.read(4))[0]
+        y = struct.unpack("f", input_stream.read(4))[0]
+
+        return Vector2(x, y)
     elif v == VariantBin.VARIANT_RECT2:
         position_x = struct.unpack("f", input_stream.read(4))[0]
         position_y = struct.unpack("f", input_stream.read(4))[0]
@@ -269,22 +283,23 @@ def read_variant(
         elif kind == OBJECT_EXTERNAL_RESOURCE_INDEX:
             index = int.from_bytes(input_stream.read(4), endian)
             return ExternalResourceIndex(index)
+        elif kind == OBJECT_INTERNAL_RESOURCE:
+            index = int.from_bytes(input_stream.read(4), endian)
+            return InternalResourceIndex(index)
 
         raise NotImplementedError(f"t={t} kind={kind}")
     elif v == VariantBin.VARIANT_DICTIONARY:
         size = int.from_bytes(input_stream.read(4), endian)
 
-        print("size:", size)
-
-        data = {}
+        data: Dict[str, PropertyValue] = {}
         for _ in range(0, size):
             key = read_variant(input_stream, endian, string_map)
-            print("  key:", key)
+            assert isinstance(key, str)
+
             key_value = read_variant(input_stream, endian, string_map)
-            print("  key_value:", key_value)
             data[key] = key_value
 
-        raise NotImplementedError(f"t={t}")
+        return data
     elif v == VariantBin.VARIANT_RAW_ARRAY:
         length = int.from_bytes(input_stream.read(4), endian)
         values_bytes: List[bytes] = [input_stream.read(1) for _ in range(0, length)]
@@ -302,6 +317,13 @@ def read_variant(
         ]
 
         return values
+    elif v == VariantBin.VARIANT_STRING_ARRAY:
+        length = int.from_bytes(input_stream.read(4), endian)
+        values_strings: List[str] = [
+            read_unicode_string(input_stream, endian) for _ in range(0, length)
+        ]
+
+        return values_strings
     elif v == VariantBin.VARIANT_INT32_ARRAY:
         length = int.from_bytes(input_stream.read(4), endian)
         values_ints: List[int] = [
