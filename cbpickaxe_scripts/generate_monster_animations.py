@@ -20,7 +20,11 @@ def main(argv: List[str]) -> int:
     parser.add_argument(
         "--monster_form_paths",
         nargs="+",
-        default=["res://data/monster_forms/", "res://data/monster_forms_secret/"],
+        default=[
+            "res://data/monster_forms/",
+            "res://data/monster_forms_secret/",
+            "res://data/monster_forms_unlisted/",
+        ],
     )
     parser.add_argument("--output_directory", required=True)
 

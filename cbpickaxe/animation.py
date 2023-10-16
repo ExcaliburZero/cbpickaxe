@@ -206,14 +206,25 @@ class Animation:
         variants = cast(List[Any], variants)
 
         animations_dict = {}
-        for n, v in zip(names, variants):
+        animation_names = []
+        for n in names:
             if n.startswith("anims/"):
-                animations_dict[n.replace("\x00", "")] = v
+                animation_names.append(n.replace("\x00", ""))
+
+        # Note: This assumes that the internal resources are exactly 1 informational resource, all
+        # the animations in the same order as they are in the names section, and the main resource.
+        #
+        # I don't have a good reason for why this works, but it seems that it does.
+        #
+        # The names and variants do not mach up in order, so this was the only was I was able to
+        # get the correct animation frames for each animation.
+        for i, animation_name in enumerate(animation_names):
+            animations_dict[animation_name] = InternalResourceIndex(index=1 + i)
 
         animations = {}
         for animation_name, v in animations_dict.items():
             if isinstance(v, InternalResourceIndex):
-                data_ = sections[v.index - 1]["tracks/0/keys"]
+                data_ = sections[v.index]["tracks/0/keys"]
 
                 assert isinstance(data_, dict)
                 for key in data_:

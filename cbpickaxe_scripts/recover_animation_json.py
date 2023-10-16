@@ -29,7 +29,8 @@ def main(argv: List[str]) -> int:
                 raise ValueError(
                     f"Failed to load/convert animation compiled json: {filepath}"
                 ) from e
-            print(animation)
+            for a in animation:
+                print(a)
 
     return SUCCESS
 
