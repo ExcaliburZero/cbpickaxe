@@ -2,7 +2,7 @@
 Classes related to sprite animations.
 """
 from dataclasses import dataclass
-from typing import Any, cast, Dict, IO, List, Tuple
+from typing import Any, cast, Dict, IO, Iterator, List, Tuple
 
 from .resource import (
     ResourceHeader,
@@ -98,6 +98,18 @@ class Animation:
     frames: List[Frame]
     frame_tags: List[FrameTag]
     image: str
+
+    def __iter__(self) -> Iterator[str]:
+        return (frame_tag.name for frame_tag in self.frame_tags)
+
+    def __getitem__(self, key: str) -> Tuple[FrameTag, List[Frame]]:
+        for frame_tag in self.frame_tags:
+            if frame_tag.name == key:
+                frames = self.frames[frame_tag.start_frame : frame_tag.end_frame]
+
+                return frame_tag, frames
+
+        raise KeyError(key)
 
     def get_frame(self, animation_name: str, frame_offset: int) -> Frame:
         """
