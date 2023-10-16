@@ -37,7 +37,10 @@ def main(argv: List[str]) -> int:
 
     monsters = {}
     for monsters_path in args.monster_form_paths:
-        monsters.update(hoylake.load_monster_forms(monsters_path))
+        if monsters_path.endswith(".tres"):
+            monsters[monsters_path] = hoylake.load_monster_form(monsters_path)
+        else:
+            monsters.update(hoylake.load_monster_forms(monsters_path))
 
     output_directory = pathlib.Path(args.output_directory)
     output_directory.mkdir(exist_ok=True)
