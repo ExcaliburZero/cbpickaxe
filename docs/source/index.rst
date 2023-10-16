@@ -3,14 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to cbpickaxe's documentation!
-=====================================
+cbpickaxe
+=========
+
+**cbpickaxe** is a Python library and set of scripts for data mining the game Cassette Beasts. It provides functionality for working with information on monster species, moves, and items.
+
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-
+   generate_docs/intro
 
 Indices and tables
 ==================
