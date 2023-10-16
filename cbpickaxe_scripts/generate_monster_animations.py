@@ -1,7 +1,8 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,missing-class-docstring
-from typing import List
+from typing import DefaultDict, List
 
 import argparse
+import collections
 import pathlib
 import sys
 
@@ -41,7 +42,8 @@ def main(argv: List[str]) -> int:
     output_directory = pathlib.Path(args.output_directory)
     output_directory.mkdir(exist_ok=True)
 
-    for _, (_, monster_form) in monsters.items():
+    seen_monster_names: DefaultDict[str, int] = collections.defaultdict(lambda: 0)
+    for _, (_, monster_form) in sorted(monsters.items()):
         try:
             animation = hoylake.load_animation(monster_form.battle_sprite_path)
         except ValueError:
@@ -59,6 +61,9 @@ def main(argv: List[str]) -> int:
         image_filepath = hoylake.lookup_filepath(image_filepath_relative)
         source_image = PIL.Image.open(image_filepath)
 
+        monster_name = hoylake.translate(monster_form.name)
+        seen_monster_names[monster_name] += 1
+
         for animation_name in animation:
             _, frames = animation[animation_name]
 
@@ -75,7 +80,7 @@ def main(argv: List[str]) -> int:
 
             animation_filepath = (
                 output_directory
-                / f"{hoylake.translate(monster_form.name)}_{animation_name}.gif"
+                / f"{monster_name}_{seen_monster_names[monster_name] - 1}_{animation_name}.gif"
             )
             images[0].save(
                 animation_filepath,
