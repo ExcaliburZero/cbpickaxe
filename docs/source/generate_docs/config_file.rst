@@ -25,14 +25,33 @@ It is common to provide two roots, one for the decompiled copy of Cassette Beast
 
 A root for Cassette Beasts must be provided, however, any number of additional roots can be provided (allowing generating documentation for multiple mods at once).
 
+.. code-block:: toml
+
+    [roots]
+    cassette_beasts = "../Cassette_Beasts"
+    traffikrabdos = "."
+
 Monster Forms
 -------------
+
+.. code-block:: toml
+
+    [monster_forms]
+    paths = [
+        "res://mods/de_example_monster/traffikrabdos.tres",
+    ]
+    include_official = false
 
 .. table::
 
     +------------------+-----------------+----------------------------------------------------------------------------+
     | Name             | Type            | Description                                                                |
     +==================+=================+============================================================================+
+    | paths            | List[str]       | Paths to `.tres` monster form files or directories that contain `.tres`    |
+    |                  |                 | monster form files.                                                        |
+    |                  |                 |                                                                            |
+    |                  |                 | Defaults to an empty list.                                                 |
+    +------------------+-----------------+----------------------------------------------------------------------------+
     | include_official | bool            | Generates documentation for the monsters in the official game, in addition |
     |                  |                 | to the monsters added by mods.                                             |
     |                  |                 |                                                                            |
@@ -42,12 +61,63 @@ Monster Forms
 Moves
 -----
 
+.. code-block:: toml
+
+    [moves]
+    paths = [
+        "res://mods/synergy_is_fun/battle_moves/"
+    ]
+    include_official = false
+
+.. table::
+
+    +------------------+-----------------+----------------------------------------------------------------------------+
+    | Name             | Type            | Description                                                                |
+    +==================+=================+============================================================================+
+    | paths            | List[str]       | Paths to `.tres` move files or directories that contain `.tres` move       |
+    |                  |                 | files.                                                                     |
+    |                  |                 |                                                                            |
+    |                  |                 | Defaults to an empty list.                                                 |
+    +------------------+-----------------+----------------------------------------------------------------------------+
+    | include_official | bool            | Generates documentation for the moves in the official game, in addition to |
+    |                  |                 | the moves added by mods.                                                   |
+    |                  |                 |                                                                            |
+    |                  |                 | Defaults to `false`.                                                       |
+    +------------------+-----------------+----------------------------------------------------------------------------+
+
 Items
 -----
 
+.. code-block:: toml
+
+    [items]
+    paths = [
+        "res://mods/gramophone_music_mod/MusicPlayerItem.tres",
+    ]
+    include_official = false
+
+.. table::
+
+    +------------------+-----------------+----------------------------------------------------------------------------+
+    | Name             | Type            | Description                                                                |
+    +==================+=================+============================================================================+
+    | paths            | List[str]       | Paths to `.tres` item files or directories that contain `.tres` item       |
+    |                  |                 | files.                                                                     |
+    |                  |                 |                                                                            |
+    |                  |                 | Defaults to an empty list.                                                 |
+    +------------------+-----------------+----------------------------------------------------------------------------+
+    | include_official | bool            | Generates documentation for the items in the official game, in addition to |
+    |                  |                 | the items added by mods.                                                   |
+    |                  |                 |                                                                            |
+    |                  |                 | Defaults to `false`.                                                       |
+    +------------------+-----------------+----------------------------------------------------------------------------+
 
 Miscellaneous
 -------------
+
+.. code-block:: toml
+
+    output_directory = "docs"
 
 .. table::
 
