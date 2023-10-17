@@ -8,17 +8,15 @@ cbpickaxe
 
 **cbpickaxe** is a Python library and set of scripts for data mining the game Cassette Beasts. It provides functionality for working with information on monster species, moves, and items.
 
-
-
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    generate_docs/intro
+   python_api/intro
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`

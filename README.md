@@ -5,7 +5,7 @@ A Python library and set of scripts for data mining the game Cassette Beasts.
 import cbpickaxe as cbp
 
 hoylake = cbp.Hoylake()
-hoylake.load_root(pathlib.Path("Cassette Beasts"))
+hoylake.load_root("cassette_beasts", pathlib.Path("Cassette Beasts"))
 
 for monster_form in hoylake.load_monster_forms("res://data/monster_forms/").values():
     monster_name = hoylake.translate(monster_form.name)
