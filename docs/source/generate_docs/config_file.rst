@@ -50,10 +50,14 @@ Monster Forms
     | paths            | List[str]       | Paths to `.tres` monster form files or directories that contain `.tres`    |
     |                  |                 | monster form files.                                                        |
     |                  |                 |                                                                            |
+    |                  |                 | |br|                                                                       |
+    |                  |                 |                                                                            |
     |                  |                 | Defaults to an empty list.                                                 |
     +------------------+-----------------+----------------------------------------------------------------------------+
     | include_official | bool            | Generates documentation for the monsters in the official game, in addition |
     |                  |                 | to the monsters added by mods.                                             |
+    |                  |                 |                                                                            |
+    |                  |                 | |br|                                                                       |
     |                  |                 |                                                                            |
     |                  |                 | Defaults to `false`.                                                       |
     +------------------+-----------------+----------------------------------------------------------------------------+
@@ -77,10 +81,14 @@ Moves
     | paths            | List[str]       | Paths to `.tres` move files or directories that contain `.tres` move       |
     |                  |                 | files.                                                                     |
     |                  |                 |                                                                            |
+    |                  |                 | |br|                                                                       |
+    |                  |                 |                                                                            |
     |                  |                 | Defaults to an empty list.                                                 |
     +------------------+-----------------+----------------------------------------------------------------------------+
     | include_official | bool            | Generates documentation for the moves in the official game, in addition to |
     |                  |                 | the moves added by mods.                                                   |
+    |                  |                 |                                                                            |
+    |                  |                 | |br|                                                                       |
     |                  |                 |                                                                            |
     |                  |                 | Defaults to `false`.                                                       |
     +------------------+-----------------+----------------------------------------------------------------------------+
@@ -104,10 +112,14 @@ Items
     | paths            | List[str]       | Paths to `.tres` item files or directories that contain `.tres` item       |
     |                  |                 | files.                                                                     |
     |                  |                 |                                                                            |
+    |                  |                 | |br|                                                                       |
+    |                  |                 |                                                                            |
     |                  |                 | Defaults to an empty list.                                                 |
     +------------------+-----------------+----------------------------------------------------------------------------+
     | include_official | bool            | Generates documentation for the items in the official game, in addition to |
     |                  |                 | the items added by mods.                                                   |
+    |                  |                 |                                                                            |
+    |                  |                 | |br|                                                                       |
     |                  |                 |                                                                            |
     |                  |                 | Defaults to `false`.                                                       |
     +------------------+-----------------+----------------------------------------------------------------------------+
