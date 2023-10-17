@@ -1,4 +1,4 @@
-# cbpickaxe [![Python library](https://github.com/ExcaliburZero/cbpickaxe/actions/workflows/python-library.yml/badge.svg)](https://github.com/ExcaliburZero/cbpickaxe/actions/workflows/python-library.yml)
+# cbpickaxe [![Python library](https://github.com/ExcaliburZero/cbpickaxe/actions/workflows/python-library.yml/badge.svg)](https://github.com/ExcaliburZero/cbpickaxe/actions/workflows/python-library.yml) [![Documentation Status](https://readthedocs.org/projects/cbpickaxe/badge/?version=latest)](https://cbpickaxe.readthedocs.io/en/latest/?badge=latest)
 A Python library and set of scripts for data mining the game Cassette Beasts.
 
 ```python
@@ -20,6 +20,13 @@ pip install -e .
 ```
 
 ## Scripts
+### Generate mod documentation
+This script can be used to generate HTML pages that document monsters, moves, items, etc. added by a mod.
+
+For a tutorial and detailed information on how to use the script, see the following page:
+
+https://cbpickaxe.readthedocs.io/en/latest/generate_docs/intro.html
+
 ### Extract translation strings
 This script can be used to extract the different translations of in-game text.
 
