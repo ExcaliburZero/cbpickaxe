@@ -6,6 +6,7 @@ from typing import Dict, List, Iterable, Optional, Set, Tuple
 import collections
 import json
 import logging
+import os
 import pathlib
 import re
 
@@ -39,7 +40,7 @@ class Hoylake:
 
         self.__moves_to_ignore = ["res://data/battle_moves/placeholder.tres"]
 
-    def load_root(self, name: str, new_root: pathlib.Path) -> None:
+    def load_root(self, name: str, new_root: str | os.PathLike) -> None:
         """
         Adds the given root directory to the list of known root directories.
 
@@ -48,6 +49,9 @@ class Hoylake:
 
         Must be run at least once before loading in any files (ex. monster forms).
         """
+        if not isinstance(new_root, pathlib.Path):
+            new_root = pathlib.Path(new_root)
+
         logging.debug(f"Loading new root directory: {new_root}")
 
         if name in self.__roots:

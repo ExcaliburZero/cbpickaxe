@@ -39,10 +39,7 @@ You will first need to create a `Hoylake` object and tell it where your decompil
     import cbpickaxe as cbp
 
     hoylake = cbp.Hoylake()
-    hoylake.load_root(
-        "cassette_beasts",
-        pathlib.Path("path_to/your_decompiled_copy_of/cassette_beasts"),
-    )
+    hoylake.load_root("cassette_beasts", "path_to/your_decompiled_copy_of/cassette_beasts")
 
 Next we will need to figure out where the monster species information is located.
 
