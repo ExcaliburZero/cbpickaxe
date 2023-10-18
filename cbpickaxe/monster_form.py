@@ -17,7 +17,7 @@ class TapeUpgrade:
 
     name: str  #: Internal name of the upgrade.
     add_slot: bool  #: If True, then the monster gets one additional sticker slot during this upgrade.
-    sticker: str  #: res:// path to the sticker ht eplayer gets when this upgrade occurs.
+    sticker: str  #: res:// path to the sticker the player gets when this upgrade occurs.
 
     @staticmethod
     def from_sub_resource(
