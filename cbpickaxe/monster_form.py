@@ -38,8 +38,16 @@ class Evolution:
     A remastering that a monster tape can undergo.
     """
 
-    name: str
-    evolved_form: str
+    name: str  #: Internal name of the remaster. Typically the English name of the remastered form.
+    evolved_form: str  #: res:// path to the monster form the monster will remaster into.
+    required_tape_grade: int  #: Grade that the monster needs to be at in order to remaster. (typically 5)
+    min_hour: float  #: Minimum in-game hour for the remaster to be able to occur. (minimum of 0.0)
+    max_hour: float  #: Maximum in-game hour for the remaster to be able to occur. (maximum of 24.0)
+    required_location: Optional[str]
+    specialization: Optional[
+        str
+    ]  #: String ID of the specialization choice to have the monster engage in this remaster.
+    is_secret: bool
 
 
 @dataclass
@@ -293,6 +301,12 @@ class MonsterForm:
             assert sub_resource is not None
 
             name = sub_resource["resource_name"]
+            required_tape_grade = sub_resource["required_tape_grade"]
+            min_hour = sub_resource["min_hour"]
+            max_hour = sub_resource["max_hour"]
+            required_location = sub_resource["required_location"]
+            specialization = sub_resource["specialization"]
+            is_secret = sub_resource["is_secret"]
 
             evolved_form_raw = sub_resource["evolved_form"]
             ext_resource = scene.find_ext_resource(id=evolved_form_raw.id)
@@ -300,7 +314,30 @@ class MonsterForm:
             evolved_form = ext_resource.path
 
             assert isinstance(name, str)
+            assert isinstance(required_tape_grade, int)
+            assert isinstance(min_hour, float)
+            assert isinstance(max_hour, float)
+            assert isinstance(required_location, str)
+            assert isinstance(specialization, str)
+            assert isinstance(is_secret, bool)
 
-            evolutions.append(Evolution(name=name, evolved_form=evolved_form))
+            if required_location == "":
+                required_location = None
+
+            if specialization == "":
+                specialization = None
+
+            evolutions.append(
+                Evolution(
+                    name=name,
+                    evolved_form=evolved_form,
+                    required_tape_grade=required_tape_grade,
+                    min_hour=min_hour,
+                    max_hour=max_hour,
+                    required_location=required_location,
+                    specialization=specialization,
+                    is_secret=is_secret,
+                )
+            )
 
         return evolutions
