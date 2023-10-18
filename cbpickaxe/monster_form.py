@@ -15,21 +15,30 @@ class TapeUpgrade:
     An activity that occurs when a monster tape reaches a specific grade level.
     """
 
-    name: str
-    add_slot: bool
+    name: str  #: Internal name of the upgrade.
+    add_slot: bool  #: If True, then the monster gets one additional sticker slot during this upgrade.
+    sticker: str  #: res:// path to the sticker ht eplayer gets when this upgrade occurs.
 
     @staticmethod
-    def from_sub_resource(sub_resource: gp.GDSubResourceSection) -> "TapeUpgrade":
+    def from_sub_resource(
+        scene: gp.GDFile, sub_resource: gp.GDSubResourceSection
+    ) -> "TapeUpgrade":
         """
         Parses the given sub resource into a TapeUpgrade.
         """
         name = sub_resource["resource_name"]
         add_slot = sub_resource.get("add_slot", default=False)
+        sticker_resource = sub_resource["sticker"]
+
+        ext_resource = scene.find_ext_resource(id=sticker_resource.id)
+        assert ext_resource is not None
+        sticker = ext_resource.path
 
         assert isinstance(name, str)
         assert isinstance(add_slot, bool)
+        assert isinstance(sticker, str)
 
-        return TapeUpgrade(name=name, add_slot=add_slot)
+        return TapeUpgrade(name=name, add_slot=add_slot, sticker=sticker)
 
 
 @dataclass
@@ -248,13 +257,16 @@ class MonsterForm:
         tape_upgrade_ids = section["tape_upgrades"]
         tape_upgrades: List[Union[TapeUpgrade, str]] = []
         for upgrade in tape_upgrade_ids:
-            sub_resource = scene.find_sub_resource(id=upgrade.id)
-            if sub_resource is not None:
-                tape_upgrades.append(TapeUpgrade.from_sub_resource(sub_resource))
-                continue
+            if isinstance(upgrade, gp.SubResource):
+                sub_resource = scene.find_sub_resource(id=upgrade.id)
+                assert sub_resource is not None
 
-            ext_resource = scene.find_ext_resource(id=upgrade.id)
-            if ext_resource is not None:
+                tape_upgrades.append(TapeUpgrade.from_sub_resource(scene, sub_resource))
+                continue
+            elif isinstance(upgrade, gp.ExtResource):
+                ext_resource = scene.find_ext_resource(id=upgrade.id)
+                assert ext_resource is not None
+
                 tape_upgrades.append(ext_resource.path)
                 continue
 
