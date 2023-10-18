@@ -45,14 +45,14 @@ class Move:
     A move / sticker that monsters can use in battle.
     """
 
-    name: str
+    name: str  #: String ID of the name of the move.
     category_name: str
-    description: str
-    cost: int
-    is_passive_only: bool
-    power: int
-    accuracy: int
-    unavoidable: bool
+    description: str  #: String ID of the description of the move.
+    cost: int  #: AP cost of the move.
+    is_passive_only: bool  #: If True, then the move only has a passive effect.
+    power: int  #: Power of the move.
+    accuracy: int  #: Accuracy of the move.
+    unavoidable: bool  #: If True, then the move is unavoidable, and thus guarenteed to hit.
     target_type: TargetType
     min_hits: int
     max_hits: int
