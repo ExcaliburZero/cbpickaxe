@@ -47,6 +47,9 @@ class MonsterForm:
     """
 
     name: str
+    swap_colors: List[gp.Color]
+    default_palette: List[gp.Color]
+    emission_palette: List[gp.Color]
     elemental_types: List[str]
     exp_yield: int
     require_dlc: str
@@ -93,6 +96,9 @@ class MonsterForm:
         scene = gp.parse(input_stream.read())
 
         name = None
+        swap_colors = None
+        default_palette = None
+        emission_palette = None
         exp_yield = None
         require_dlc = None
         move_slots = None
@@ -117,6 +123,9 @@ class MonsterForm:
             # pylint: disable-next=unidiomatic-typecheck
             if type(section) == gp.GDResourceSection:
                 name = section["name"]
+                swap_colors = section["swap_colors"]
+                default_palette = section["default_palette"]
+                emission_palette = section["emission_palette"]
                 bestiary_index = section["bestiary_index"]
                 move_slots = section["move_slots"]
                 exp_yield = section["exp_yield"]
@@ -141,6 +150,9 @@ class MonsterForm:
                 evolutions = MonsterForm.__parse_evolutions(scene, section)
 
         assert isinstance(name, str)
+        assert isinstance(swap_colors, list)
+        assert isinstance(default_palette, list)
+        assert isinstance(emission_palette, list)
         assert isinstance(bestiary_index, int)
         assert isinstance(move_slots, int)
         assert isinstance(exp_yield, int)
@@ -162,6 +174,18 @@ class MonsterForm:
         assert tape_upgrades is not None
         assert evolutions is not None
 
+        for color in emission_palette:
+            assert isinstance(color, gp.Color)
+        emission_palette = cast(List[gp.Color], emission_palette)
+
+        for color in swap_colors:
+            assert isinstance(color, gp.Color)
+        swap_colors = cast(List[gp.Color], swap_colors)
+
+        for color in default_palette:
+            assert isinstance(color, gp.Color)
+        default_palette = cast(List[gp.Color], default_palette)
+
         for tag in move_tags:
             assert isinstance(tag, str)
         move_tags = cast(List[str], move_tags)
@@ -172,6 +196,9 @@ class MonsterForm:
 
         return MonsterForm(
             name=name,
+            swap_colors=swap_colors,
+            default_palette=default_palette,
+            emission_palette=emission_palette,
             elemental_types=elemental_types,
             exp_yield=exp_yield,
             require_dlc=require_dlc,
