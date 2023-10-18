@@ -17,10 +17,10 @@ class Color:
     Exists primarily to be a JSON serializable alternative to godot_parser's Color class.
     """
 
-    red: float
-    green: float
-    blue: float
-    alpha: float
+    red: float  #: Red component in the range of [0.0, 1.0].
+    green: float  #: Green component in the range of [0.0, 1.0].
+    blue: float  #: Blue component in the range of [0.0, 1.0].
+    alpha: float  #: Alpha/opacity of the color in the range of [0.0, 1.0], where 1.0 indicates fully opaque and 0.0 indicates fully transparent.
 
     @staticmethod
     def from_gp(original: gp.Color) -> "Color":
@@ -41,8 +41,8 @@ class Vector2:
     A 2D vector.
     """
 
-    x: float
-    y: float
+    x: float  #: x component of the vector.
+    y: float  #: y component of the vector.
 
 
 @dataclass(frozen=True)
@@ -51,5 +51,5 @@ class Rect2:
     A 2D rectangle.
     """
 
-    position: Vector2
-    size: Vector2
+    position: Vector2  #: Position of the top left corner of the rectangle.
+    size: Vector2  #: Width (x) and height (y) of the rectangle.
