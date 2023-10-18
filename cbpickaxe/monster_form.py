@@ -48,32 +48,38 @@ class MonsterForm:
     A monster form (species).
     """
 
-    name: str
+    name: str  #: String ID of the name of the monster.
     swap_colors: List[Color]
     default_palette: List[Color]
     emission_palette: List[Color]
-    battle_cry: Optional[str]
-    elemental_types: List[str]
-    exp_yield: int
-    require_dlc: str
+    battle_cry: Optional[str]  #: res:// path of the battle cry sound of the monster.
+    elemental_types: List[
+        str
+    ]  #: Elemental types of the monster. Typically only one, but can be empty or have multiple.
+    exp_yield: int  #: Value used in calculating the exp the monster yields when defeated in battle. (typically 40)
+    require_dlc: str  #: DLC that the monster requires. Empty if no DLC is required.
     pronouns: int
-    description: str
-    max_hp: int
-    melee_attack: int
-    melee_defense: int
-    ranged_attack: int
-    ranged_defense: int
-    speed: int
-    accuracy: int
-    evasion: int
-    max_ap: int
-    move_slots: int
-    evolutions: List[Evolution]
-    bestiary_index: int
-    move_tags: List[str]
-    battle_sprite_path: str
+    description: str  #: String ID of the monster's description.
+    max_hp: int  #: Base max HP stat value.
+    melee_attack: int  #: Base melee attack stat value.
+    melee_defense: int  #: Base melee defense stat value.
+    ranged_attack: int  #: Base ranged attack stat value.
+    ranged_defense: int  #: Base ranged defense stat value.
+    speed: int  #: Base speed stat value.
+    accuracy: int  #: Base accuracy value. (typically 100)
+    evasion: int  #: Base evasion value. (typically 100)
+    max_ap: int  #: Maximum amount of AP the monster can have in battle.
+    move_slots: int  #: Number of move slots the monster has at base grade.
+    evolutions: List[Evolution]  #: List of remasters that the monster can undergo.
+    bestiary_index: int  #: Bestiary index. Natural numbers for main-game monsters. -1 for DLC and mod-added monsters.
+    move_tags: List[
+        str
+    ]  #: List of tags that the monster can equip moves of. (Note that all monsters can also equip stickers with the "all" tag, which is not included in this list)
+    battle_sprite_path: str  #: res:// path to the monster's battle sprite animation file.
     tape_upgrades: List[Union[TapeUpgrade, str]]
-    bestiary_bios: List[str]
+    bestiary_bios: List[
+        str
+    ]  #: List of string ids for the monster's bestiary entries. Typically a list of two string ids.
 
     @property
     def max_move_slots(self) -> int:
