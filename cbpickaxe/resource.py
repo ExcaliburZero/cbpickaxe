@@ -7,6 +7,8 @@ from typing import Dict, IO, List, Literal, Tuple, Union
 import enum
 import struct
 
+from .misc_types import Vector2, Rect2
+
 OBJECT_EMPTY = 0
 OBJECT_EXTERNAL_RESOURCE = 1
 OBJECT_INTERNAL_RESOURCE = 2
@@ -116,26 +118,6 @@ class NodePath:
 
     name_parts: List[str]
     sub_name_parts: List[str]
-
-
-@dataclass
-class Vector2:
-    """
-    A 2D vector.
-    """
-
-    x: float
-    y: float
-
-
-@dataclass
-class Rect2:
-    """
-    A 2D rectangle.
-    """
-
-    position: Vector2
-    size: Vector2
 
 
 PropertyValue = Union[

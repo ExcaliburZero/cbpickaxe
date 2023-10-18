@@ -6,6 +6,8 @@ from typing import cast, IO, List, Optional, Union
 
 import godot_parser as gp
 
+from .misc_types import Color
+
 
 @dataclass
 class TapeUpgrade:
@@ -47,9 +49,10 @@ class MonsterForm:
     """
 
     name: str
-    swap_colors: List[gp.Color]
-    default_palette: List[gp.Color]
-    emission_palette: List[gp.Color]
+    swap_colors: List[Color]
+    default_palette: List[Color]
+    emission_palette: List[Color]
+    battle_cry: Optional[str]
     elemental_types: List[str]
     exp_yield: int
     require_dlc: str
@@ -145,6 +148,7 @@ class MonsterForm:
                 battle_sprite_path = section["battle_sprite_path"]
                 bestiary_bios = section["bestiary_bios"]
 
+                battle_cry = MonsterForm.__parse_battle_cry(scene, section)
                 tape_upgrades = MonsterForm.__parse_tape_upgrades(scene, section)
                 elemental_types = MonsterForm.__parse_elemental_types(scene, section)
                 evolutions = MonsterForm.__parse_evolutions(scene, section)
@@ -196,9 +200,10 @@ class MonsterForm:
 
         return MonsterForm(
             name=name,
-            swap_colors=swap_colors,
-            default_palette=default_palette,
-            emission_palette=emission_palette,
+            swap_colors=[Color.from_gp(color) for color in swap_colors],
+            default_palette=[Color.from_gp(color) for color in default_palette],
+            emission_palette=[Color.from_gp(color) for color in emission_palette],
+            battle_cry=battle_cry,
             elemental_types=elemental_types,
             exp_yield=exp_yield,
             require_dlc=require_dlc,
@@ -242,6 +247,19 @@ class MonsterForm:
             raise ValueError(f"Could not find tape upgrade with id={upgrade.id}")
 
         return tape_upgrades
+
+    @staticmethod
+    def __parse_battle_cry(
+        scene: gp.GDFile, section: gp.GDResourceSection
+    ) -> Optional[str]:
+        battle_cry_raw = section.get("battle_cry", None)
+        if battle_cry_raw is None:
+            return None
+
+        ext_resource = scene.find_ext_resource(id=battle_cry_raw.id)
+        assert ext_resource is not None
+
+        return ext_resource.path
 
     @staticmethod
     def __parse_elemental_types(
