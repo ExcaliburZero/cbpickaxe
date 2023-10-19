@@ -1,7 +1,7 @@
 """
 A library for data mining the game Cassette Beasts.
 """
-from .animation import Animation, Frame, FrameTag
+from .animation import Animation, Frame, FrameTag, Box
 from .hoylake import Hoylake
 from .item import Item
 from .misc_types import Color
@@ -11,6 +11,7 @@ from .translation_table import TranslationTable
 
 __all__ = [
     "Animation",
+    "Box",
     "Frame",
     "FrameTag",
     "Hoylake",
