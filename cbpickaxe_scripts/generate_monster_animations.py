@@ -1,5 +1,5 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring,missing-class-docstring
-from typing import DefaultDict, List, Optional
+from typing import DefaultDict, List
 
 import argparse
 import collections
@@ -71,9 +71,11 @@ def main(argv: List[str]) -> int:
         for animation_name in animation:
             _, frames = animation[animation_name]
 
-            furthest_extent: Optional[cbp.Box] = None
+            assert len(frames) > 0
+
             images = []
             cropped_images = []
+            combined_image = None
             for frame in frames:
                 box = (
                     frame.box.x,
@@ -84,29 +86,17 @@ def main(argv: List[str]) -> int:
                 cropped_image = source_image.crop(box)
                 cropped_images.append(cropped_image)
 
-                content_box = cropped_image.getbbox()
-                assert content_box is not None
+                if combined_image is None:
+                    combined_image = cropped_image.copy()
+                else:
+                    combined_image.paste(cropped_image, (0, 0), mask=cropped_image)
 
-                furthest_extent = expand_box_to_include(
-                    furthest_extent,
-                    cbp.Box(
-                        content_box[0],
-                        content_box[1],
-                        content_box[2] - content_box[0],
-                        content_box[3] - content_box[1],
-                    ),
-                )
-
-            assert furthest_extent is not None
+            assert combined_image is not None
 
             for image in cropped_images:
-                box = (
-                    furthest_extent.x,
-                    furthest_extent.y,
-                    furthest_extent.x + furthest_extent.width,
-                    furthest_extent.y + furthest_extent.height,
+                cropped_image = (
+                    image.crop(combined_image.getbbox()) if args.crop else image
                 )
-                cropped_image = image.crop(box) if args.crop else image
                 images.append(cropped_image)
 
             animation_filepath = (
@@ -125,27 +115,6 @@ def main(argv: List[str]) -> int:
             print(f"Wrote animation to: {animation_filepath}")
 
     return SUCCESS
-
-
-def expand_box_to_include(box_a: Optional[cbp.Box], box_b: cbp.Box) -> cbp.Box:
-    if box_a is None:
-        return box_b
-
-    left = min(box_a.x, box_b.x)
-    top = min(box_a.y, box_a.y)
-
-    right = max(box_a.x + box_a.width, box_b.x + box_b.width)
-    bottom = max(box_a.y + box_a.height, box_b.y + box_b.height)
-
-    assert left < right
-    assert top < bottom
-
-    return cbp.Box(
-        left,
-        top,
-        right - left,
-        bottom - top,
-    )
 
 
 def main_without_args() -> int:
