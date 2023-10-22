@@ -13,6 +13,7 @@ cbpickaxe
    :caption: Contents
 
    generate_docs/intro
+   other_scripts/intro
    python_api/intro
 
 Indices and tables
