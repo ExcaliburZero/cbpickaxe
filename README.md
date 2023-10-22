@@ -25,4 +25,4 @@ pip install -e .
 | [generate_docs](https://cbpickaxe.readthedocs.io/en/latest/generate_docs/intro.html) | Generates HTML pages that document monsters, moves, items, etc. added by a mod. |
 | [extract_translation](https://cbpickaxe.readthedocs.io/en/latest/other_scripts/extract_translation_strings.html) | Extracts the translations of given in-game text |
 | [get_move_users](https://cbpickaxe.readthedocs.io/en/latest/other_scripts/get_move_users.html) | Finds all of the monster species that can use given moves. |
-| generate_monster_animations | Creates animated gifs of monster battle animations. |
+| [generate_monster_animations](https://cbpickaxe.readthedocs.io/en/latest/other_scripts/generate_monster_animations.html) | Creates animated gifs of monster battle animations. |
