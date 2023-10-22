@@ -21,10 +21,10 @@ class Box:
     A rectangular region of an image.
     """
 
-    x: int
-    y: int
-    width: int
-    height: int
+    x: int  #: Left-most position of the Box.
+    y: int  #: Upper-most position of the Box.
+    width: int  #: Width of the Box.
+    height: int  #: Height of the Box.
 
     @staticmethod
     def from_dict(d: Dict[Any, Any]) -> "Box":
@@ -50,7 +50,7 @@ class Frame:
     A frame that can be used in animations.
     """
 
-    box: Box
+    box: Box  #: Box that defines the area on the sprite sheet that makes up the frame.
 
     @staticmethod
     def from_dict(d: Dict[Any, Any]) -> "Frame":
@@ -68,9 +68,9 @@ class FrameTag:
     A tag descripting the frames of an animation.
     """
 
-    name: str
-    start_frame: int
-    end_frame: int
+    name: str  #: Name of the FrameTag, typically the name of the animation (ex. "idle").
+    start_frame: int  #: Id of the first frame that makes up the animation.
+    end_frame: int  #: Id of the last frame that makes up the animation.
 
     @staticmethod
     def from_dict(d: Dict[Any, Any]) -> "FrameTag":
@@ -95,9 +95,13 @@ class Animation:
     animations (ex. idle, attack, hurt),
     """
 
-    frames: List[Frame]
-    frame_tags: List[FrameTag]
-    image: str
+    frames: List[
+        Frame
+    ]  #: Frames that make up the animations. Can be indexed into using the frame ids stored in FrameTags.
+    frame_tags: List[
+        FrameTag
+    ]  #: Information on specific animations (ex. "idle", "atttack", etc.)
+    image: str  #: Relative filepath to the sprite sheet image for the animation.
 
     def __iter__(self) -> Iterator[str]:
         return (frame_tag.name for frame_tag in self.frame_tags)
