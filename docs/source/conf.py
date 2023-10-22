@@ -26,6 +26,9 @@ rst_prolog = """
   <br/>
 """
 
+# Stop it from auto-wronging -- to an EM dash
+smartquotes = False
+
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
