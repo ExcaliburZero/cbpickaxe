@@ -17,5 +17,6 @@ Python API
    :maxdepth: 2
 
    tutorial
+   roots
    example_scripts
    classes_and_methods
