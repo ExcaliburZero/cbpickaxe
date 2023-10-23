@@ -22,6 +22,7 @@ keywords = ["Cassette Beasts"]
 test = ["black", "mypy", "pylint", "pytest"]
 
 [project.urls]
+Changelog = "https://github.com/ExcaliburZero/cbpickaxe/blob/master/CHANGELOG.md"
 Documentation = "https://cbpickaxe.readthedocs.io/en/latest/"
 Homepage = "https://github.com/ExcaliburZero/cbpickaxe"
 Issues = "https://github.com/ExcaliburZero/cbpickaxe/issues"
