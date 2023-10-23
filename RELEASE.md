@@ -2,6 +2,7 @@
 * Pick a new version number
 * Update the version number in `pyproject.toml`
 * Update the version number in `docs/conf.py`
+* Update the changelog
 ```bash
 make test regression_test
 
