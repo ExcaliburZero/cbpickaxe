@@ -9,4 +9,4 @@ regression_test:
 	python -m pytest regression_tests/test_*.py
 
 build:
-	python -m build --wheel
+	python -m build
