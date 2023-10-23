@@ -13,6 +13,12 @@ for monster_form in hoylake.load_monster_forms("res://data/monster_forms/").valu
 ```
 
 ## Installation
+### Latest release
+```bash
+pip install cbpickaxe
+```
+
+### Development
 ```bash
 git clone https://github.com/ExcaliburZero/cbpickaxe.git
 cd cbpickaxe
