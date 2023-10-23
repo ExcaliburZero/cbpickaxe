@@ -11,7 +11,17 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    name: Build ${{ matrix.archs }} wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            archs: "x86_64, i686"
+          - os: windows-latest
+            archs: "x86"
+          - os: macos-latest
+            archs: "x86_64, arm64"
 
     steps:
     - uses: actions/checkout@v3
