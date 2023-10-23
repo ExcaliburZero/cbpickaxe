@@ -1,3 +1,45 @@
+[project]
+name = "cbpickaxe"
+version = "0.0.1"
+description = "A Python library and scripts for data mining the game Cassette Beasts."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "ExcaliburZero"}]
+license = {text = "MIT License"}
+dependencies = ["godot_parser", "smaz-py3", "Jinja2", "Pillow"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Typing :: Typed"
+]
+keywords = ["Cassette Beasts"]
+
+[project.optional-dependencies]
+test = ["black", "mypy", "pylint", "pytest"]
+
+[project.urls]
+Documentation = "https://cbpickaxe.readthedocs.io/en/latest/"
+Homepage = "https://github.com/ExcaliburZero/cbpickaxe"
+Issues = "https://github.com/ExcaliburZero/cbpickaxe/issues"
+Repository = "https://github.com/ExcaliburZero/cbpickaxe.git"
+
+[tool.setuptools]
+packages = ["cbpickaxe", "cbpickaxe_scripts"]
+
+[project.scripts]
+cbpickaxe_extract_translation = "cbpickaxe_scripts:extract_translation_main"
+cbpickaxe_get_move_users = "cbpickaxe_scripts:get_move_users_main"
+cbpickaxe_generate_docs = "cbpickaxe_scripts:generate_docs_main"
+cbpickaxe_generate_monster_animations = "cbpickaxe_scripts:generate_monster_animations_main"
+
+[tool.setuptools.package-data]
+cbpickaxe = ["py.typed"]
+cbpickaxe_scripts = ["templates/*.html"]
+
 [tool.mypy]
 ignore_missing_imports = true
 disallow_untyped_defs = true
