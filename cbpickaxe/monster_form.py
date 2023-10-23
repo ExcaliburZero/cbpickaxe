@@ -93,7 +93,9 @@ class MonsterForm:
         str
     ]  #: List of tags that the monster can equip moves of. (Note that all monsters can also equip stickers with the "all" tag, which is not included in this list)
     battle_sprite_path: str  #: res:// path to the monster's battle sprite animation file.
-    tape_upgrades: List[Union[TapeUpgrade, str]]
+    tape_upgrades: List[
+        Union[TapeUpgrade, str]
+    ]  #: Events that occur when the monster form increases its grade.
     bestiary_bios: List[
         str
     ]  #: List of string ids for the monster's bestiary entries. Typically a list of two string ids.

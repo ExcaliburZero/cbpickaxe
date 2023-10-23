@@ -13,10 +13,10 @@ class Item:
     An item that the player can obtain.
     """
 
-    name: str
-    description: str
+    name: str  #: String ID of the name of the item.
+    description: str  #: String ID of the description of the item.
     category: str
-    icon: Optional[str]
+    icon: Optional[str]  #: res:// path to the item's icon.
 
     @staticmethod
     def from_tres(input_stream: IO[str]) -> "Item":

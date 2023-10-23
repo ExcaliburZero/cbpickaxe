@@ -58,8 +58,8 @@ class Move:
     max_hits: int
     can_be_copied: bool
     priority: int
-    tags: List[str]
-    elemental_types: List[str]
+    tags: List[str]  #: Tags that determine which monsters can use the move.
+    elemental_types: List[str]  #: Type(s) of the move.
 
     @staticmethod
     def from_tres(input_stream: IO[str]) -> "Move":
