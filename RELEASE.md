@@ -22,9 +22,11 @@ pushd data/mods
 cbpickaxe_generate_docs build
 popd
 
+git push origin master
+
 export VERSION=v0.1.0
-git tag -a $(VERSION)
-git push origin $(VERSION)
+git tag -a "$VERSION" -m "$VERSION"
+git push origin "$VERSION"
 
 python3 -m twine upload dist/* --verbose
 ```
