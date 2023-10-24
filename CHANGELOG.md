@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Version bound on `smaz-py3` in order to get cbpickaxe to sucessfully install on Windows.
+
 ## [0.1.0] - 2023-10-22
 
 ### Added
