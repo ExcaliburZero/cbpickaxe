@@ -35,10 +35,10 @@ jobs:
         pip install .
     - name: Lint with mypy
       run: |
-        mypy **/*.py
+        mypy .
     - name: Lint with black
       run: |
-        black --check **/*.py
+        black --check .
     - name: Lint with pylint
       run: |
         pylint cbpickaxe/*.py cbpickaxe_scripts/*.py

@@ -42,6 +42,7 @@ cbpickaxe = ["py.typed"]
 cbpickaxe_scripts = ["templates/*.html"]
 
 [tool.mypy]
+exclude = ["build", "docs"]
 ignore_missing_imports = true
 disallow_untyped_defs = true
 show_error_codes = true
