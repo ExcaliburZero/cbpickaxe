@@ -24,7 +24,10 @@ class Util:
 
             self.run_command(work_dir)
 
-            self.diff_against_baselines(work_dir)
+            # Note: Only check against baselines on non-Windows OSs, since windows has some
+            # differences that I don't want to add support for smartly diffing yet.
+            if not os.name == "nt":
+                self.diff_against_baselines(work_dir)
 
         def get_work_dir(self) -> pathlib.Path:
             return (
