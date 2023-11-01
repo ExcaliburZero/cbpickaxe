@@ -129,13 +129,40 @@ def recolor_to_bootleg(
     monster_form: cbp.MonsterForm,
     elemental_type: cbp.ElementalType,
 ) -> PIL.Image.Image:
+    if len(monster_form.swap_colors) == 0:
+        return image
+
+    if len(elemental_type.palette) == 0:
+        return image
+
+    # TODO: handle default palette of monster form if it exists
+    source_colors = list(monster_form.swap_colors)
+    output_colors = list(monster_form.swap_colors)
+
+    # Replicating the game's approach. This loop's condition is weird. I don't know what the
+    # intent with it is.
+    i = 0
+    while i < len(output_colors) and output_colors[i] == elemental_type.palette[0]:
+        i += len(elemental_type.palette)
+
+    if i >= len(output_colors):
+        # This branch appears to never trigger. I'm not sure what the intent was in the game's code.
+        for j in range(0, len(elemental_type.palette)):
+            output_colors[j] = elemental_type.palette[j]
+    else:
+        # "Swap" the existing colors. If the bootleg does not have swapped colors, then the next
+        # loop will overwrite this.
+        for j in range(0, len(elemental_type.palette)):
+            output_colors[j] = output_colors[i + j]
+
+        # Apply the palette of the elemental type
+        for j in range(0, len(elemental_type.palette)):
+            output_colors[i + j] = elemental_type.palette[j]
+
+    assert len(source_colors) == len(output_colors)
     color_mapping = {
-        monster_form.swap_colors[i]
-        .to_8bit_rgba(): elemental_type.palette[i]
-        .to_8bit_rgba()
-        for i in range(
-            0, min(len(monster_form.swap_colors), len(elemental_type.palette))
-        )
+        source_colors[i].to_8bit_rgba(): output_colors[i].to_8bit_rgba()
+        for i in range(0, len(source_colors))
     }
 
     # This appears to be the correct way to do it in Pillow. The point method appears not to
