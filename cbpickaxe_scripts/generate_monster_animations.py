@@ -129,21 +129,13 @@ def recolor_to_bootleg(
     monster_form: cbp.MonsterForm,
     elemental_type: cbp.ElementalType,
 ) -> PIL.Image.Image:
-    if len(monster_form.swap_colors) < 5:
-        print(
-            f"Warning: Insufficient swap colors for monster_form: {monster_form.name}"
-        )
-        return image
-
-    assert (
-        len(elemental_type.palette) >= 5
-    ), f"Elemental type's palette only has {len(elemental_type.palette)} colors. Must be at least 5."
-
     color_mapping = {
         monster_form.swap_colors[i]
         .to_8bit_rgba(): elemental_type.palette[i]
         .to_8bit_rgba()
-        for i in range(0, 5)
+        for i in range(
+            0, min(len(monster_form.swap_colors), len(elemental_type.palette))
+        )
     }
 
     # This appears to be the correct way to do it in Pillow. The point method appears not to
