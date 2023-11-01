@@ -5,6 +5,7 @@ Many of these are simple dataclass re-implementations of Godot datatypes, which 
 write out to JSON.
 """
 from dataclasses import dataclass
+from typing import Tuple
 
 import godot_parser as gp
 
@@ -21,6 +22,17 @@ class Color:
     green: float  #: Green component in the range of [0.0, 1.0].
     blue: float  #: Blue component in the range of [0.0, 1.0].
     alpha: float  #: Alpha/opacity of the color in the range of [0.0, 1.0], where 1.0 indicates fully opaque and 0.0 indicates fully transparent.
+
+    def to_8bit_rgba(self) -> Tuple[int, int, int, int]:
+        """
+        Converts the color to an RGBA tuple where each color value is in the range [0, 255].
+        """
+        return (
+            int(round(self.red * 255)),
+            int(round(self.green * 255)),
+            int(round(self.blue * 255)),
+            int(round(self.alpha * 255)),
+        )
 
     @staticmethod
     def from_gp(original: gp.Color) -> "Color":

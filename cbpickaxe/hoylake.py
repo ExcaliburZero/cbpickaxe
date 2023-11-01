@@ -11,6 +11,7 @@ import pathlib
 import re
 
 from .animation import Animation
+from .elemental_type import ElementalType
 from .item import Item
 from .monster_form import MonsterForm
 from .move import Move
@@ -59,6 +60,21 @@ class Hoylake:
 
         self.__roots[name] = new_root
         self.__load_translation_tables(new_root)
+
+    def load_elemental_type(self, path: str) -> Tuple[RootName, ElementalType]:
+        self.__check_if_root_loaded()
+
+        relative_path = Hoylake.__parse_res_path(path)
+
+        for root_name, root in self.__roots.items():
+            type_path = root / relative_path
+            if type_path.exists():
+                with open(type_path, "r", encoding="utf-8") as input_stream:
+                    elemental_type = ElementalType.from_tres(input_stream)
+
+                    return root_name, elemental_type
+
+        raise ValueError(f"Could not find elemental type file at path: {path}")
 
     def load_animation(self, path: str) -> Animation:
         """

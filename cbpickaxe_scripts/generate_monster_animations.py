@@ -29,12 +29,17 @@ def main(argv: List[str]) -> int:
     )
     parser.add_argument("--output_directory", required=True)
     parser.add_argument("--crop", default=False, action="store_true")
+    parser.add_argument("--bootleg_type", default=None)
 
     args = parser.parse_args(argv)
 
     hoylake = cbp.Hoylake()
     for i, root in enumerate(args.roots):
         hoylake.load_root(str(i), pathlib.Path(root))
+
+    bootleg_type = None
+    if args.bootleg_type is not None:
+        _, bootleg_type = hoylake.load_elemental_type(args.bootleg_type)
 
     monsters = {}
     for monsters_path in args.monster_form_paths:
@@ -64,6 +69,8 @@ def main(argv: List[str]) -> int:
 
         image_filepath = hoylake.lookup_filepath(image_filepath_relative)
         source_image = PIL.Image.open(image_filepath)
+        if bootleg_type is not None:
+            source_image = recolor_to_bootleg(source_image, monster_form, bootleg_type)
 
         monster_name = hoylake.translate(monster_form.name)
         seen_monster_names[monster_name] += 1
@@ -115,6 +122,43 @@ def main(argv: List[str]) -> int:
             print(f"Wrote animation to: {animation_filepath}")
 
     return SUCCESS
+
+
+def recolor_to_bootleg(
+    image: PIL.Image.Image,
+    monster_form: cbp.MonsterForm,
+    elemental_type: cbp.ElementalType,
+) -> PIL.Image.Image:
+    if len(monster_form.swap_colors) < 5:
+        print(
+            f"Warning: Insufficient swap colors for monster_form: {monster_form.name}"
+        )
+        return image
+
+    assert (
+        len(elemental_type.palette) >= 5
+    ), f"Elemental type's palette only has {len(elemental_type.palette)} colors. Must be at least 5."
+
+    color_mapping = {
+        monster_form.swap_colors[i]
+        .to_8bit_rgba(): elemental_type.palette[i]
+        .to_8bit_rgba()
+        for i in range(0, 5)
+    }
+
+    # This appears to be the correct way to do it in Pillow. The point method appears not to
+    # support non-greyscale images.
+    new_image = image.copy()
+    pixels = new_image.load()
+    colors = set()
+    for i in range(new_image.size[0]):
+        for j in range(new_image.size[1]):
+            new_color = color_mapping.get(pixels[i, j], None)
+            colors.add(pixels[i, j])
+            if new_color is not None:
+                pixels[i, j] = new_color
+
+    return new_image
 
 
 def main_without_args() -> int:
