@@ -48,23 +48,41 @@ def main(argv: List[str]) -> int:
             ouput_stream, fieldnames=["id", *sorted(set(locales.values()))]
         )
         writer.writeheader()
-
-        for i in strings_to_translate:
-            row = {
-                "id": i,
-            }
+        
+        def find_string(id):
             for name, table in tables.items():
                 locale = locales[name]
-                message = table.get(i, "")
+                message = table.get(id, "")
                 assert isinstance(message, str)
 
                 if message != "":
                     row[locale] = message
 
+        for i in strings_to_translate:
+            row = {
+                "id": i,
+            }
+            
+            find_string(i)
+
+            if len(row.keys()) == 1:
+                i += ".n"
+                row["id"] = i
+                find_string(i)
+            
             writer.writerow(row)
+                        
+            """
+            NOTES REGARDING THE ORIGINAL CODE:
+            - IDs with no string found did not have the locale key
+                Possible solutions:
+                - Check if the string ID does not have the locale key
+                    - if locale not in row.keys():
+                - Check if the string ID only has one key (id)
+                    - if len(row.keys()) == 1:
+            """
 
     return SUCCESS
-
 
 def main_without_args() -> int:
     return main(sys.argv[1:])
