@@ -66,11 +66,16 @@ def main(argv: List[str]) -> int:
             find_string(i)
 
             if len(row.keys()) == 1:
-                i += ".n"
-                row["id"] = i
-                find_string(i)
-            
-            writer.writerow(row)
+                pronouns = [".f", ".m", ".n"]
+                ids_with_pronouns = []
+                for pronoun in pronouns:
+                    ids_with_pronouns.append(i + pronoun)
+                for id_with_pronoun in ids_with_pronouns:
+                    row["id"] = id_with_pronoun
+                    find_string(id_with_pronoun)
+                    writer.writerow(row)
+            else:
+                writer.writerow(row)
                         
             """
             NOTES REGARDING THE ORIGINAL CODE:
