@@ -76,16 +76,6 @@ def main(argv: List[str]) -> int:
                     writer.writerow(row)
             else:
                 writer.writerow(row)
-                        
-            """
-            NOTES REGARDING THE ORIGINAL CODE:
-            - IDs with no string found did not have the locale key
-                Possible solutions:
-                - Check if the string ID does not have the locale key
-                    - if locale not in row.keys():
-                - Check if the string ID only has one key (id)
-                    - if len(row.keys()) == 1:
-            """
 
     return SUCCESS
 
