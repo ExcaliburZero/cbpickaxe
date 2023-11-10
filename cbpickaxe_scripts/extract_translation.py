@@ -68,8 +68,10 @@ def main(argv: List[str]) -> int:
             if len(row.keys()) == 1:
                 pronouns = [".f", ".m", ".n"]
                 ids_with_pronouns = []
+                
                 for pronoun in pronouns:
                     ids_with_pronouns.append(i + pronoun)
+                    
                 for id_with_pronoun in ids_with_pronouns:
                     row["id"] = id_with_pronoun
                     find_string(id_with_pronoun)
@@ -78,6 +80,7 @@ def main(argv: List[str]) -> int:
                 writer.writerow(row)
 
     return SUCCESS
+
 
 def main_without_args() -> int:
     return main(sys.argv[1:])
