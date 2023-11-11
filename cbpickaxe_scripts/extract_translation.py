@@ -21,15 +21,7 @@ def main(argv: List[str]) -> int:
 
     args = parser.parse_args(argv)
 
-    strings_to_translate = []
-    for filepath in args.strings_text_files:
-        with open(filepath, "r", encoding="utf-8") as input_stream:
-            for line in input_stream:
-                line = line.strip()
-                if line == "":
-                    continue
-
-                strings_to_translate.append(line)
+    strings_to_translate = load_string_text_files(args.strings_text_files)
 
     tables: Dict[str, cbp.TranslationTable] = {}
     for translation_filepath in args.translation_files:
@@ -49,7 +41,7 @@ def main(argv: List[str]) -> int:
         )
         writer.writeheader()
 
-        def find_string(id):
+        def find_string(id: str) -> None:
             for name, table in tables.items():
                 locale = locales[name]
                 message = table.get(id, "")
@@ -80,6 +72,20 @@ def main(argv: List[str]) -> int:
                 writer.writerow(row)
 
     return SUCCESS
+
+
+def load_string_text_files(filepaths: List[str]) -> List[str]:
+    strings_to_translate = []
+    for filepath in filepaths:
+        with open(filepath, "r", encoding="utf-8") as input_stream:
+            for line in input_stream:
+                line = line.strip()
+                if line == "":
+                    continue
+
+                strings_to_translate.append(line)
+
+    return strings_to_translate
 
 
 def main_without_args() -> int:
