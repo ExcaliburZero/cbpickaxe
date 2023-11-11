@@ -48,7 +48,7 @@ def main(argv: List[str]) -> int:
             ouput_stream, fieldnames=["id", *sorted(set(locales.values()))]
         )
         writer.writeheader()
-        
+
         def find_string(id):
             for name, table in tables.items():
                 locale = locales[name]
@@ -62,16 +62,16 @@ def main(argv: List[str]) -> int:
             row = {
                 "id": i,
             }
-            
+
             find_string(i)
 
             if len(row.keys()) == 1:
                 pronouns = [".f", ".m", ".n"]
                 ids_with_pronouns = []
-                
+
                 for pronoun in pronouns:
                     ids_with_pronouns.append(i + pronoun)
-                    
+
                 for id_with_pronoun in ids_with_pronouns:
                     row["id"] = id_with_pronoun
                     find_string(id_with_pronoun)
