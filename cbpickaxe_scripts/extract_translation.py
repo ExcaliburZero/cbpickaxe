@@ -41,10 +41,10 @@ def main(argv: List[str]) -> int:
         )
         writer.writeheader()
 
-        def find_string(id: str) -> None:
+        def find_string(string_id: str) -> None:
             for name, table in tables.items():
                 locale = locales[name]
-                message = table.get(id, "")
+                message = table.get(string_id, "")
                 assert isinstance(message, str)
 
                 if message != "":
