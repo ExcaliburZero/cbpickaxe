@@ -48,20 +48,36 @@ def main(argv: List[str]) -> int:
             ouput_stream, fieldnames=["id", *sorted(set(locales.values()))]
         )
         writer.writeheader()
-
-        for i in strings_to_translate:
-            row = {
-                "id": i,
-            }
+        
+        def find_string(id):
             for name, table in tables.items():
                 locale = locales[name]
-                message = table.get(i, "")
+                message = table.get(id, "")
                 assert isinstance(message, str)
 
                 if message != "":
                     row[locale] = message
 
-            writer.writerow(row)
+        for i in strings_to_translate:
+            row = {
+                "id": i,
+            }
+            
+            find_string(i)
+
+            if len(row.keys()) == 1:
+                pronouns = [".f", ".m", ".n"]
+                ids_with_pronouns = []
+                
+                for pronoun in pronouns:
+                    ids_with_pronouns.append(i + pronoun)
+                    
+                for id_with_pronoun in ids_with_pronouns:
+                    row["id"] = id_with_pronoun
+                    find_string(id_with_pronoun)
+                    writer.writerow(row)
+            else:
+                writer.writerow(row)
 
     return SUCCESS
 
