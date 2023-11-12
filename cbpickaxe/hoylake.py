@@ -38,6 +38,9 @@ class Hoylake:
         self.__moves: Dict[RelativeResPath, Tuple[RootName, Move]] = {}
         self.__animations: Dict[RelativeResPath, Tuple[RootName, Animation]] = {}
         self.__items: Dict[RelativeResPath, Tuple[RootName, Item]] = {}
+        self.__elemental_types: Dict[
+            RelativeResPath, Tuple[RootName, ElementalType]
+        ] = {}
 
         self.__moves_to_ignore = ["res://data/battle_moves/placeholder.tres"]
 
@@ -66,11 +69,15 @@ class Hoylake:
 
         relative_path = Hoylake.__parse_res_path(path)
 
+        if relative_path in self.__elemental_types:
+            return self.__elemental_types[relative_path]
+
         for root_name, root in self.__roots.items():
             type_path = root / relative_path
             if type_path.exists():
                 with open(type_path, "r", encoding="utf-8") as input_stream:
                     elemental_type = ElementalType.from_tres(input_stream)
+                    self.__elemental_types[relative_path] = (root_name, elemental_type)
 
                     return root_name, elemental_type
 
