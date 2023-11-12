@@ -149,8 +149,8 @@ def recolor_to_bootleg(
 
     if i >= len(output_colors):
         # This branch appears to never trigger. I'm not sure what the intent was in the game's code.
-        for j in range(0, len(elemental_type.palette)):
-            output_colors[j] = elemental_type.palette[j]
+        for j, type_color in enumerate(elemental_type.palette):
+            output_colors[j] = type_color
     else:
         # "Swap" the existing colors. If the bootleg does not have swapped colors, then the next
         # loop will overwrite this.
@@ -158,8 +158,8 @@ def recolor_to_bootleg(
             output_colors[j] = output_colors[i + j]
 
         # Apply the palette of the elemental type
-        for j in range(0, len(elemental_type.palette)):
-            output_colors[i + j] = elemental_type.palette[j]
+        for j, type_color in enumerate(elemental_type.palette):
+            output_colors[i + j] = type_color
 
     assert len(source_colors) == len(output_colors)
     color_mapping = {
