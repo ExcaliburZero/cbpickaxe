@@ -1,6 +1,6 @@
 [project]
 name = "cbpickaxe"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Python library and scripts for data mining the game Cassette Beasts."
 readme = "README.md"
 requires-python = ">=3.11"

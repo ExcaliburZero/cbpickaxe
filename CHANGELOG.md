@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2023-11-11
+
+### Added
+
+- Automatic detection of gender-specific string variants to `cbpickaxe_extract_translation`. (#3)
+- Partial support for `ElementalType`s in the Python API.
+
 ## [0.1.1] - 2023-10-23
 
 ### Added
