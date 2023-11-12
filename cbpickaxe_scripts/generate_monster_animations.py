@@ -29,9 +29,12 @@ def main(argv: List[str]) -> int:
     )
     parser.add_argument("--output_directory", required=True)
     parser.add_argument("--crop", default=False, action="store_true")
-    parser.add_argument("--bootleg_type", default=None)
+    # parser.add_argument("--bootleg_type", default=None)
 
     args = parser.parse_args(argv)
+
+    # Note: Disabled temporarily until the implementation is properly working
+    args.bootleg_type = None
 
     hoylake = cbp.Hoylake()
     for i, root in enumerate(args.roots):
