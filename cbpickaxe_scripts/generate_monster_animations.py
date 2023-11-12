@@ -129,6 +129,8 @@ def recolor_to_bootleg(
     monster_form: cbp.MonsterForm,
     elemental_type: cbp.ElementalType,
 ) -> PIL.Image.Image:
+    # TODO: test more. Glitter Jellyton is not working. Maybe RGB rounding?
+
     if len(monster_form.swap_colors) == 0:
         return image
 
