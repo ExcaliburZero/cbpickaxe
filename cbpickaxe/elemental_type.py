@@ -1,3 +1,6 @@
+"""
+Classes related to elemental types.
+"""
 from dataclasses import dataclass
 from typing import cast, IO, List
 
@@ -8,10 +11,17 @@ from .misc_types import Color
 
 @dataclass
 class ElementalType:
-    palette: List[Color]
+    """
+    An elemental type.
+    """
+
+    palette: List[Color]  #: Color palette of the type.
 
     @staticmethod
     def from_tres(input_stream: IO[str]) -> "ElementalType":
+        """
+        Parses an ElementalType from the given Godot ".tres" input stream.
+        """
         scene = gp.parse(input_stream.read())
 
         palette = None
