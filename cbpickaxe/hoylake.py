@@ -65,6 +65,14 @@ class Hoylake:
         self.__load_translation_tables(new_root)
 
     def load_elemental_type(self, path: str) -> Tuple[RootName, ElementalType]:
+        """
+        Loads in the elemental type at the given res:// filepath.
+
+        Must have loaded at least one root before running.
+
+        If there is no elemental type file at that location in any of the loaded root directories,
+        then a ValueError will be raised.
+        """
         self.__check_if_root_loaded()
 
         relative_path = Hoylake.__parse_res_path(path)
